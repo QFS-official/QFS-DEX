@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QFS Swap — Price Chart</title>
+  <meta name="description" content="QFS Swap price chart for popular pairs across BNB, Polygon, Solana, and Ethereum." />
+  <link rel="icon" href="./qfs-logo.png" />
+  <link rel="stylesheet" href="./chart.css" />
+</head>
+<body>
+  <header class="header">
+    <a class="brand" href="https://qfsswap.vercel.app" target="_blank" rel="noopener">
+      <img src="./qfs-logo.png" alt="QFS Swap logo" width="32" height="32" />
+      <span>QFS <strong>Swap</strong></span>
+      <span class="badge">Chart</span>
+    </a>
+    <div class="header-meta">
+      <span class="muted">Powered by QFS Routing</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="pair">
+            <span id="pair-label">QFS/USDC</span>
+            <span class="tag">QFS</span>
+          </div>
+          <div class="price-row">
+            <span class="price" id="price-current">—</span>
+            <span class="change" id="price-change">—</span>
+          </div>
+        </div>
+        <div class="range-tabs" id="range-tabs">
+          <button data-range="1h" class="active">1H</button>
+          <button data-range="24h">24H</button>
+          <button data-range="7d">7D</button>
+          <button data-range="30d">30D</button>
+        </div>
+      </div>
+
+      <div class="pair-selector">
+        <label for="pair-select">Pair:</label>
+        <select id="pair-select">
+          <option value="QFS-USDC">QFS/USDC</option>
+          <option value="ETH-USDC">ETH/USDC</option>
+          <option value="BNB-USDT">BNB/USDT</option>
+          <option value="POL-USDC">POL/USDC</option>
+          <option value="SOL-USDC">SOL/USDC</option>
+          <option value="ALARAB-USDC">ALARAB/USDC</option>
+          <option value="GCRM-USDC">GCRM/USDC</option>
+          <option value="TRAEX-USDC">TRAEX/USDC</option>
+        </select>
+      </div>
+
+      <div class="chart-wrap">
+        <svg id="chart" viewBox="0 0 800 240" preserveAspectRatio="none"></svg>
+        <div class="tooltip" id="tooltip" hidden></div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">24h low</span>
+          <span class="stat-value" id="stat-min">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">24h high</span>
+          <span class="stat-value" id="stat-max">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Volatility</span>
+          <span class="stat-value" id="stat-vol">—</span>
+        </div>
+      </div>
+
+      <p class="disclaimer">
+        Demo data — generated with a seeded random walk. In production, this page
+        fetches live prices from CoinGecko or an on-chain oracle.
+      </p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a href="https://github.com/QFS-official/QFS-DEX" target="_blank" rel="noopener">
+      QFS-official/QFS-DEX
+    </a>
+    ·
+    <span>Powered by QFS Swap — Wormhole cross-chain protocol</span>
+  </footer>
+
+  <script src="./chart.js"></script>
+</body>
+</html>

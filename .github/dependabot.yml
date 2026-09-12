@@ -1,0 +1,101 @@
+# Dependabot configuration
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+
+updates:
+  # ─── Bun / npm dependencies (package.json + bun.lock) ───────────────────
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/Lima"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "npm"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    groups:
+      # Group all React-related packages together
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "react-*"
+          - "@types/react"
+          - "@types/react-dom"
+      # Group Next.js ecosystem
+      next:
+        patterns:
+          - "next"
+          - "next-*"
+          - "eslint-config-next"
+      # Group Tailwind + shadcn ecosystem
+      tailwind:
+        patterns:
+          - "tailwindcss"
+          - "tailwind-*"
+          - "@tailwindcss/*"
+          - "tailwindcss-animate"
+          - "tw-animate-css"
+      # Group Radix UI primitives (used by shadcn/ui)
+      radix:
+        patterns:
+          - "@radix-ui/*"
+      # Group Prisma
+      prisma:
+        patterns:
+          - "prisma"
+          - "@prisma/client"
+      # Group dev tooling (linters, type-checkers)
+      dev-tooling:
+        patterns:
+          - "typescript"
+          - "eslint"
+          - "eslint-*"
+          - "@typescript-eslint/*"
+          - "bun-types"
+    ignore:
+      # Don't auto-bump major versions of these — they have breaking changes
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@prisma/client"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "prisma"
+        update-types: ["version-update:semver-major"]
+      # Don't auto-bump alpha/beta/canary versions
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # ─── GitHub Actions dependencies (.github/workflows/*.yml) ──────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/Lima"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    groups:
+      # Group all action updates together
+      actions:
+        patterns:
+          - "actions/*"
+          - "oven-sh/*"
+          - "amondnet/*"
