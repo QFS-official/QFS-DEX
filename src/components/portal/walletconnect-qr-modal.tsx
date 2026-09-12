@@ -11,6 +11,8 @@ import {
   Info,
   Loader2,
   RefreshCw,
+  Search,
+  Smartphone,
   Star,
   Trash2,
   X,
@@ -37,7 +39,10 @@ import type { useWallet } from "@/hooks/use-wallet";
 import {
   MOBILE_WALLETS,
   useMobileWalletRecents,
+  useDevice,
+  getWalletHref,
   type MobileWallet,
+  type DeviceKind,
 } from "@/lib/wallets/mobile-recents";
 
 interface Props {
@@ -258,15 +263,21 @@ export function WalletConnectQRModal({
 
 /**
  * "Populares / Recientes" tabbed grid of mobile wallets.
- * The Populares tab shows the full catalog (8 wallets).
+ * The Populares tab shows the full catalog (8 wallets) with a search filter.
  * The Recientes tab shows the user's recently-clicked wallets (max 6),
  * persisted to localStorage. Clicking a wallet link records it as recent.
+ *
+ * Device-aware: on iOS / Android, the tile's href is the wallet's WC universal
+ * link (which opens the wallet app directly with the pairing URI). On desktop,
+ * the href is the wallet's general download page.
  */
 function MobileWalletsTabs({ uri }: { uri: string | null }) {
   const { recents, record, clear } = useMobileWalletWallets();
+  const device = useDevice();
   const [tab, setTab] = useState<"populares" | "recientes">(
     recents.length > 0 ? "recientes" : "populares",
   );
+  const [query, setQuery] = useState("");
 
   // If recents becomes empty while we're on the Recientes tab, switch back
   // to Populares (scheduled to satisfy the set-state-in-effect lint rule).
@@ -285,6 +296,19 @@ function MobileWalletsTabs({ uri }: { uri: string | null }) {
     [recents],
   );
 
+  // Filter Populares by search query (case-insensitive name match)
+  const filteredPopular = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return MOBILE_WALLETS;
+    return MOBILE_WALLETS.filter((w) => {
+      return (
+        w.name.toLowerCase().includes(q) ||
+        // also match on the catalog id (e.g. "trust-mobile")
+        w.id.includes(q)
+      );
+    });
+  }, [query]);
+
   // On first mount, if recents has entries, switch to the Recientes tab
   // — we use a ref guard so this only runs once on mount, and schedule the
   // setState via setTimeout to satisfy the react-hooks/set-state-in-effect rule.
@@ -298,6 +322,14 @@ function MobileWalletsTabs({ uri }: { uri: string | null }) {
     }
   }, [recents.length]);
 
+  // Reset search query when switching tabs away from Populares
+  useEffect(() => {
+    if (tab !== "populares" && query) {
+      const t = window.setTimeout(() => setQuery(""), 0);
+      return () => window.clearTimeout(t);
+    }
+  }, [tab, query]);
+
   function handleWalletClick(id: string) {
     record(id);
   }
@@ -305,8 +337,18 @@ function MobileWalletsTabs({ uri }: { uri: string | null }) {
   return (
     <Tabs value={tab} onValueChange={(v) => setTab(v as "populares" | "recientes")}>
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-          No tienes wallet? Descarga una
+        <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
+          {device === "desktop" ? (
+            <>
+              <Smartphone className="h-3 w-3" />
+              No tienes wallet? Descarga una
+            </>
+          ) : (
+            <>
+              <Smartphone className="h-3 w-3" />
+              Abre tu wallet en {device === "ios" ? "iOS" : "Android"}
+            </>
+          )}
         </span>
         {recents.length > 0 && tab === "recientes" && (
           <button
@@ -346,17 +388,55 @@ function MobileWalletsTabs({ uri }: { uri: string | null }) {
       </TabsList>
 
       <TabsContent value="populares" className="mt-2">
-        <div className="grid grid-cols-2 gap-2">
-          {MOBILE_WALLETS.map((w) => (
-            <MobileWalletTile
-              key={w.id}
-              wallet={w}
-              uri={uri}
-              onClick={() => handleWalletClick(w.id)}
-              isRecent={recents.includes(w.id)}
-            />
-          ))}
+        {/* Search input — only visible in Populares */}
+        <div className="relative mb-2">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar wallet…"
+            className="w-full rounded-lg bg-white/[0.04] py-1.5 pl-7 pr-7 text-[11px] text-white placeholder:text-muted-foreground/60 ring-1 ring-white/8 transition-colors focus:bg-white/[0.06] focus:outline-none focus:ring-[#8b7cf6]/40"
+            aria-label="Buscar wallet"
+          />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-white"
+              aria-label="Limpiar búsqueda"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
         </div>
+
+        {filteredPopular.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/8 bg-white/[0.02] px-4 py-6 text-center">
+            <Search className="h-4 w-4 text-muted-foreground/40" />
+            <div className="text-xs text-muted-foreground">
+              No se encontraron wallets para &quot;{query}&quot;
+            </div>
+            <button
+              onClick={() => setQuery("")}
+              className="mt-1 rounded-md bg-white/5 px-2.5 py-1 text-[11px] text-white/80 ring-1 ring-white/8 transition-colors hover:bg-white/10"
+            >
+              Limpiar búsqueda
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            {filteredPopular.map((w) => (
+              <MobileWalletTile
+                key={w.id}
+                wallet={w}
+                uri={uri}
+                device={device}
+                onClick={() => handleWalletClick(w.id)}
+                isRecent={recents.includes(w.id)}
+              />
+            ))}
+          </div>
+        )}
       </TabsContent>
 
       <TabsContent value="recientes" className="mt-2">
@@ -383,6 +463,7 @@ function MobileWalletsTabs({ uri }: { uri: string | null }) {
                 key={w.id}
                 wallet={w}
                 uri={uri}
+                device={device}
                 onClick={() => handleWalletClick(w.id)}
                 isRecent={true}
               />
@@ -397,45 +478,66 @@ function MobileWalletsTabs({ uri }: { uri: string | null }) {
 function MobileWalletTile({
   wallet,
   uri,
+  device,
   onClick,
   isRecent = false,
 }: {
   wallet: MobileWallet;
   uri: string | null;
+  device: DeviceKind;
   onClick: () => void;
   isRecent?: boolean;
 }) {
-  // In production with a real WC projectId, we'd deep-link to the wallet app
-  // using `${wallet.wcDeepLink}${encodeURIComponent(uri)}`. Since this is a
-  // demo, we just link to the wallet's download page.
-  const href = wallet.url;
+  // Compute the right href based on device + whether we have a live WC URI
+  const href = getWalletHref(wallet, device, uri);
+
+  // Label that explains what will happen on click
+  const actionLabel =
+    device === "desktop"
+      ? `Descargar ${wallet.name}`
+      : uri
+        ? `Abrir ${wallet.name} en tu ${device === "ios" ? "iPhone" : "Android"}`
+        : `Instalar ${wallet.name}`;
 
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={onClick}
-      className="group flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.02] px-2.5 py-2 text-[11px] text-white/80 transition-all hover:border-[#8b7cf6]/40 hover:bg-white/[0.05]"
-      title={`Abrir ${wallet.name}`}
-    >
-      <div
-        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white"
-        style={{
-          background: `linear-gradient(135deg, ${wallet.gradient[0]}, ${wallet.gradient[1]})`,
-        }}
-      >
-        {wallet.glyph}
-      </div>
-      <span className="min-w-0 flex-1 truncate">{wallet.name}</span>
-      {isRecent && (
-        <span
-          className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#8b7cf6]"
-          title="Abierta recientemente"
-        />
-      )}
-      <ExternalLink className="h-2.5 w-2.5 shrink-0 text-muted-foreground/70 transition-colors group-hover:text-white" />
-    </a>
+    <TooltipProvider delayDuration={400}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <a
+            href={href}
+            target={device === "desktop" ? "_blank" : "_self"}
+            rel={device === "desktop" ? "noopener noreferrer" : undefined}
+            onClick={onClick}
+            className="group flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.02] px-2.5 py-2 text-[11px] text-white/80 transition-all hover:border-[#8b7cf6]/40 hover:bg-white/[0.05]"
+            title={actionLabel}
+          >
+            <div
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white"
+              style={{
+                background: `linear-gradient(135deg, ${wallet.gradient[0]}, ${wallet.gradient[1]})`,
+              }}
+            >
+              {wallet.glyph}
+            </div>
+            <span className="min-w-0 flex-1 truncate">{wallet.name}</span>
+            {isRecent && (
+              <span
+                className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#8b7cf6]"
+                title="Abierta recientemente"
+              />
+            )}
+            {device === "desktop" ? (
+              <ExternalLink className="h-2.5 w-2.5 shrink-0 text-muted-foreground/70 transition-colors group-hover:text-white" />
+            ) : (
+              <Smartphone className="h-2.5 w-2.5 shrink-0 text-[#8b7cf6] transition-colors group-hover:text-[#b8a8ff]" />
+            )}
+          </a>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="text-xs">
+          {actionLabel}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 

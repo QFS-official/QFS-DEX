@@ -1,22 +1,32 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 /**
  * Catalog of mobile wallets shown in the WalletConnect QR modal.
  * Each entry has a brand gradient, glyph, official site (download page) and
- * an optional `wcDeepLink` (universal link) used in production to open the
- * mobile wallet directly and pass the WC URI for instant pairing.
+ * per-platform App Store / Play Store URLs + a WC universal link base used
+ * to deep-link into the mobile wallet app with the pairing URI.
  */
 export interface MobileWallet {
   id: string;
   name: string;
   gradient: [string, string];
   glyph: string;
-  /** Site / download page */
+  /** Site / download page (desktop fallback) */
   url: string;
-  /** Universal link that opens the wallet on mobile (production) */
-  wcDeepLink?: string;
+  /** App Store URL (iOS) */
+  iosUrl: string;
+  /** Play Store URL (Android) */
+  androidUrl: string;
+  /**
+   * WC universal link base, e.g. `https://link.trustwallet.com/wc?uri=`.
+   * On mobile, when the user clicks the tile we append the encoded WC URI
+   * to this base, which opens the wallet app directly with the pairing
+   * request. If the app isn't installed, the universal link falls back to
+   * the App Store / Play Store entry for that wallet.
+   */
+  universalLink: string;
 }
 
 export const MOBILE_WALLETS: MobileWallet[] = [
@@ -26,7 +36,9 @@ export const MOBILE_WALLETS: MobileWallet[] = [
     gradient: ["#3375BB", "#0EA88B"],
     glyph: "T",
     url: "https://www.trustwallet.com/download",
-    wcDeepLink: "https://link.trustwallet.com/wc?uri=",
+    iosUrl: "https://apps.apple.com/app/trust-wallet/id1288339409",
+    androidUrl: "https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp",
+    universalLink: "https://link.trustwallet.com/wc?uri=",
   },
   {
     id: "metamask-mobile",
@@ -34,7 +46,9 @@ export const MOBILE_WALLETS: MobileWallet[] = [
     gradient: ["#F6851B", "#E2761B"],
     glyph: "M",
     url: "https://metamask.io/download/",
-    wcDeepLink: "https://metamask.app.link/wc?uri=",
+    iosUrl: "https://apps.apple.com/us/app/metamask/id1438143602",
+    androidUrl: "https://play.google.com/store/apps/details?id=io.metamask",
+    universalLink: "https://metamask.app.link/wc?uri=",
   },
   {
     id: "rainbow",
@@ -42,7 +56,9 @@ export const MOBILE_WALLETS: MobileWallet[] = [
     gradient: ["#0017FF", "#7B61FF"],
     glyph: "R",
     url: "https://rainbow.me/download",
-    wcDeepLink: "https://rainbow.me/wc?uri=",
+    iosUrl: "https://apps.apple.com/us/app/rainbow-ethereum-wallet/id1457119021",
+    androidUrl: "https://play.google.com/store/apps/details?id=me.rainbow",
+    universalLink: "https://rainbow.me/wc?uri=",
   },
   {
     id: "coinbase-mobile",
@@ -50,7 +66,9 @@ export const MOBILE_WALLETS: MobileWallet[] = [
     gradient: ["#0052FF", "#1A56FF"],
     glyph: "C",
     url: "https://www.coinbase.com/wallet/downloads",
-    wcDeepLink: "https://www.coinbase.com/walletlinks/wc?uri=",
+    iosUrl: "https://apps.apple.com/us/app/coinbase-wallet/id1278383455",
+    androidUrl: "https://play.google.com/store/apps/details?id=org.coinbase.wallet",
+    universalLink: "https://go.cbwallet.com/meWC?uri=",
   },
   {
     id: "binance-mobile",
@@ -58,7 +76,9 @@ export const MOBILE_WALLETS: MobileWallet[] = [
     gradient: ["#F0B90B", "#F8D12F"],
     glyph: "B",
     url: "https://www.binance.com/en/web3wallet",
-    wcDeepLink: "https://www.binance.com/en/web3wallet/wc?uri=",
+    iosUrl: "https://apps.apple.com/us/app/binance-buy-bitcoin-crypto/id1436400302",
+    androidUrl: "https://play.google.com/store/apps/details?id=com.binance.dev",
+    universalLink: "https://www.binance.com/en/web3wallet/wc?uri=",
   },
   {
     id: "okx",
@@ -66,7 +86,9 @@ export const MOBILE_WALLETS: MobileWallet[] = [
     gradient: ["#2A2A2A", "#000000"],
     glyph: "O",
     url: "https://www.okx.com/web3/wallet",
-    wcDeepLink: "https://www.okx.com/walletconnect?uri=",
+    iosUrl: "https://apps.apple.com/us/app/okx-buy-bitcoin-crypto/id1327265475",
+    androidUrl: "https://play.google.com/store/apps/details?id=com.okinc.okwallet",
+    universalLink: "https://www.okx.com/walletconnect?uri=",
   },
   {
     id: "safepal",
@@ -74,7 +96,9 @@ export const MOBILE_WALLETS: MobileWallet[] = [
     gradient: ["#3182FF", "#1E5BC6"],
     glyph: "S",
     url: "https://www.safepal.com/download",
-    wcDeepLink: "https://link.safepal.com/wc?uri=",
+    iosUrl: "https://apps.apple.com/us/app/safepal/id1548361220",
+    androidUrl: "https://play.google.com/store/apps/details?id=com.safepal.wallet",
+    universalLink: "https://link.safepal.com/wc?uri=",
   },
   {
     id: "exodus",
@@ -82,7 +106,9 @@ export const MOBILE_WALLETS: MobileWallet[] = [
     gradient: ["#FF5E2C", "#D43A12"],
     glyph: "E",
     url: "https://www.exodus.com/download",
-    wcDeepLink: "https://www.exodus.com/wc?uri=",
+    iosUrl: "https://apps.apple.com/us/app/exodus-crypto-wallet/id1440046789",
+    androidUrl: "https://play.google.com/store/apps/details?id=exodusmovement.exodus",
+    universalLink: "https://www.exodus.com/wc?uri=",
   },
 ];
 
@@ -175,4 +201,68 @@ export function useMobileWalletRecents(): {
     record: recordMobileWallet,
     clear: clearMobileRecents,
   };
+}
+
+// ─── Device detection ─────────────────────────────────────────────────────
+
+export type DeviceKind = "ios" | "android" | "desktop";
+
+function detectDevice(): DeviceKind {
+  if (typeof navigator === "undefined") return "desktop";
+  const ua = navigator.userAgent.toLowerCase();
+  // iPad on iOS 13+ reports as Mac Safari, so check for touch + Mac
+  const isIpad =
+    ua.includes("macintosh") &&
+    typeof document !== "undefined" &&
+    "ontouchend" in document;
+  if (
+    ua.includes("iphone") ||
+    ua.includes("ipad") ||
+    ua.includes("ipod") ||
+    isIpad
+  ) {
+    return "ios";
+  }
+  if (ua.includes("android")) return "android";
+  return "desktop";
+}
+
+/**
+ * Compute the right href for a mobile wallet tile based on the user's device
+ * and whether we have a live WC pairing URI:
+ *
+ * - iOS / Android + has URI → universal link with the encoded URI appended
+ *   (this opens the wallet app directly, or its App Store / Play Store page
+ *   if not installed)
+ * - iOS without URI → App Store page
+ * - Android without URI → Play Store page
+ * - Desktop → wallet.url (general download page)
+ */
+export function getWalletHref(
+  wallet: MobileWallet,
+  device: DeviceKind,
+  uri: string | null,
+): string {
+  if (device === "desktop") return wallet.url;
+  if (uri && uri.length > 0) {
+    return wallet.universalLink + encodeURIComponent(uri);
+  }
+  if (device === "ios") return wallet.iosUrl;
+  return wallet.androidUrl;
+}
+
+/**
+ * Stable lazy hook for device detection. Returns "desktop" on the server and
+ * during hydration, then re-renders with the real device after mount.
+ * (setState is scheduled via setTimeout to satisfy react-hooks/set-state-in-effect.)
+ */
+export function useDevice(): DeviceKind {
+  const [device, setDevice] = useState<DeviceKind>("desktop");
+  useEffect(() => {
+    const detected = detectDevice();
+    if (detected === "desktop") return;
+    const t = window.setTimeout(() => setDevice(detected), 0);
+    return () => window.clearTimeout(t);
+  }, []);
+  return device;
 }
