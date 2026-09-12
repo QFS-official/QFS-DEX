@@ -67,3 +67,8 @@ playwright-report/
 test-results/
 blob-report/
 /.playwright/
+
+# Vercel CLI local state (contains OIDC tokens, project link, etc.)
+/.vercel/
+.env.local
+tool-results/
