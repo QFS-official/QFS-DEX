@@ -80,8 +80,44 @@
   --sidebar-ring: #8b7cf6;
 }
 
-:root:not(.dark) {
-  /* Force dark theme even when no .dark class is present — Portal is dark-only */
+/* ─── Light theme: cream + navy + same lavender accent ────────────────── */
+.light {
+  --background: #f8f7fc;
+  --foreground: #1a1832;
+  --card: #ffffff;
+  --card-foreground: #1a1832;
+  --popover: #ffffff;
+  --popover-foreground: #1a1832;
+  --primary: #6b5ce7;
+  --primary-foreground: #ffffff;
+  --secondary: #ece9f5;
+  --secondary-foreground: #1a1832;
+  --muted: #f0eef7;
+  --muted-foreground: #6b6480;
+  --accent: #e6e1f2;
+  --accent-foreground: #1a1832;
+  --destructive: #dc2626;
+  --border: rgba(26, 24, 50, 0.10);
+  --input: rgba(26, 24, 50, 0.06);
+  --ring: #6b5ce7;
+  --chart-1: #6b5ce7;
+  --chart-2: #059669;
+  --chart-3: #d97706;
+  --chart-4: #7c3aed;
+  --chart-5: #ea580c;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1a1832;
+  --sidebar-primary: #6b5ce7;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ece9f5;
+  --sidebar-accent-foreground: #1a1832;
+  --sidebar-border: rgba(26, 24, 50, 0.10);
+  --sidebar-ring: #6b5ce7;
+}
+
+/* Keep the dark theme active even when no .dark class is present on the html
+ * element — QFS Swap defaults to dark, light only kicks in via .light. */
+:root:not(.dark):not(.light) {
   --radius: 1rem;
   --background: #0b0a1f;
   --foreground: #f5f5fa;
@@ -189,4 +225,52 @@
   /* Hide scrollbars but keep scroll */
   .portal-scroll-hidden::-webkit-scrollbar { display: none; }
   .portal-scroll-hidden { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* ─── Light theme overrides for portal-* utility classes ──────────────── */
+.light .portal-bg {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(139, 124, 246, 0.16), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 110% 100%, rgba(18, 241, 149, 0.08), transparent 60%),
+    radial-gradient(ellipse 60% 50% at -10% 100%, rgba(240, 185, 11, 0.08), transparent 60%),
+    linear-gradient(180deg, #f8f7fc 0%, #ece9f5 100%);
+}
+
+.light .portal-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fafaff 100%);
+  border: 1px solid rgba(26, 24, 50, 0.08);
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 0 0 1px rgba(139, 124, 246, 0.04),
+    0 8px 24px rgba(26, 24, 50, 0.08);
+}
+
+.light .portal-pill {
+  background: rgba(26, 24, 50, 0.04);
+  border: 1px solid rgba(26, 24, 50, 0.08);
+}
+.light .portal-pill:hover {
+  background: rgba(26, 24, 50, 0.08);
+}
+
+.light .portal-divider {
+  background: linear-gradient(90deg, transparent, rgba(26, 24, 50, 0.10) 20%, rgba(26, 24, 50, 0.10) 80%, transparent);
+}
+
+.light .portal-swap-button {
+  background: linear-gradient(180deg, #ffffff 0%, #f0eef7 100%);
+  border: 1px solid rgba(139, 124, 246, 0.4);
+  box-shadow: 0 2px 8px rgba(26, 24, 50, 0.08);
+}
+.light .portal-swap-button:hover {
+  border-color: rgba(139, 124, 246, 0.7);
+  box-shadow: 0 4px 12px rgba(139, 124, 246, 0.25);
+}
+
+.light .portal-grid-bg {
+  background-image:
+    linear-gradient(rgba(139, 124, 246, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 124, 246, 0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export type BridgeMode = "swap" | "dca" | "bridge";
 
@@ -10,13 +10,13 @@ interface ModeTabsProps {
   onChange: (next: BridgeMode) => void;
 }
 
-const TABS: { id: BridgeMode; label: string; isNew?: boolean }[] = [
-  { id: "swap", label: "Swap" },
-  { id: "dca", label: "DCA", isNew: true },
-  { id: "bridge", label: "Bridge" },
-];
-
 export function ModeTabs({ value, onChange }: ModeTabsProps) {
+  const { t } = useLanguage();
+  const TABS: { id: BridgeMode; label: string; isNew?: boolean }[] = [
+    { id: "swap", label: t("mode.swap") },
+    { id: "dca", label: t("mode.dca"), isNew: true },
+    { id: "bridge", label: t("mode.bridge") },
+  ];
   return (
     <div className="inline-flex items-center gap-1 rounded-full border border-white/8 bg-white/[0.03] p-1 backdrop-blur-md">
       {TABS.map((tab) => {
@@ -27,7 +27,7 @@ export function ModeTabs({ value, onChange }: ModeTabsProps) {
             onClick={() => onChange(tab.id)}
             className={
               "relative flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors " +
-              (active ? "text-[#0b0a1f]" : "text-muted-foreground hover:text-white")
+              (active ? "text-[#0b0a1f]" : "text-muted-foreground hover:text-foreground")
             }
           >
             {active && (

@@ -144,7 +144,7 @@ export function TokenPickerModal({
           {/* Header */}
           <div className="relative flex shrink-0 items-center justify-between border-b border-white/5 px-5 py-4">
             <div>
-              <DialogTitle className="text-base font-semibold text-white">
+              <DialogTitle className="text-base font-semibold text-foreground">
                 Selecciona el token para {side === "de" ? "pagar" : "recibir"}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
@@ -153,7 +153,7 @@ export function TokenPickerModal({
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-white"
+              className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
               aria-label="Cerrar"
             >
               <X className="h-4 w-4" />
@@ -170,14 +170,14 @@ export function TokenPickerModal({
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Buscar por nombre o dirección…"
-                  className="w-full rounded-lg bg-white/[0.04] py-2 pl-8 pr-3 text-xs text-white placeholder:text-muted-foreground/60 ring-1 ring-white/8 transition-colors focus:bg-white/[0.06] focus:outline-none focus:ring-[#8b7cf6]/40"
+                  className="w-full rounded-lg bg-white/[0.04] py-2 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/60 ring-1 ring-white/8 transition-colors focus:bg-white/[0.06] focus:outline-none focus:ring-[#8b7cf6]/40"
                   aria-label="Buscar token"
                   autoFocus
                 />
               </div>
               <button
                 onClick={handlePasteCA}
-                className="flex shrink-0 items-center gap-1 rounded-lg bg-white/[0.04] px-2.5 py-2 text-[11px] font-medium text-white/80 ring-1 ring-white/8 transition-colors hover:bg-white/[0.07] hover:text-white"
+                className="flex shrink-0 items-center gap-1 rounded-lg bg-white/[0.04] px-2.5 py-2 text-[11px] font-medium text-foreground/80 ring-1 ring-white/8 transition-colors hover:bg-white/[0.07] hover:text-foreground"
                 title="Pegar dirección del contrato"
               >
                 <ClipboardPaste className="h-3 w-3" />
@@ -189,7 +189,7 @@ export function TokenPickerModal({
             <div>
               <div className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">
                 Selecciona la red:{" "}
-                <span className="text-white/80">{CHAINS[currentChain].name}</span>
+                <span className="text-foreground/80">{CHAINS[currentChain].name}</span>
               </div>
               <div className="portal-scroll-hidden -mx-1 flex items-center gap-1 overflow-x-auto px-1 pb-1">
                 <FilterButton
@@ -235,7 +235,7 @@ export function TokenPickerModal({
                       title={cfg.name}
                     >
                       <span
-                        className="flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white"
+                        className="flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-foreground"
                         style={{
                           background: `linear-gradient(135deg, ${cfg.gradient[0]}, ${cfg.gradient[1]})`,
                         }}
@@ -273,7 +273,7 @@ export function TokenPickerModal({
                   {query && (
                     <button
                       onClick={() => setQuery("")}
-                      className="mt-1 rounded-md bg-white/5 px-2.5 py-1 text-[11px] text-white/80 ring-1 ring-white/8 transition-colors hover:bg-white/10"
+                      className="mt-1 rounded-md bg-white/5 px-2.5 py-1 text-[11px] text-foreground/80 ring-1 ring-white/8 transition-colors hover:bg-white/10"
                     >
                       Limpiar búsqueda
                     </button>
@@ -327,8 +327,8 @@ function FilterButton({
       className={
         "flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-all " +
         (active
-          ? "bg-white/10 text-white ring-1 ring-[#8b7cf6]/50 shadow-[0_0_12px_rgba(139,124,246,0.2)]"
-          : "bg-white/[0.03] text-muted-foreground ring-1 ring-white/8 hover:text-white hover:bg-white/[0.06]")
+          ? "bg-white/10 text-foreground ring-1 ring-[#8b7cf6]/50 shadow-[0_0_12px_rgba(139,124,246,0.2)]"
+          : "bg-white/[0.03] text-muted-foreground ring-1 ring-white/8 hover:text-foreground hover:bg-white/[0.06]")
       }
     >
       {children}
@@ -340,7 +340,7 @@ function TokenGlyph({ token, size = "md" }: { token: BridgeToken; size?: "sm" | 
   const dim = size === "lg" ? "h-9 w-9 text-xs" : size === "sm" ? "h-6 w-6 text-[9px]" : "h-8 w-8 text-[10px]";
   return (
     <div
-      className={`flex shrink-0 items-center justify-center rounded-full font-bold text-white ${dim}`}
+      className={`flex shrink-0 items-center justify-center rounded-full font-bold text-foreground ${dim}`}
       style={{
         background: `linear-gradient(135deg, ${token.gradient[0]}, ${token.gradient[1]})`,
       }}
@@ -376,7 +376,7 @@ function TokenRow({
       <TokenGlyph token={token} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className="text-sm font-semibold text-white">{token.symbol}</span>
+          <span className="text-sm font-semibold text-foreground">{token.symbol}</span>
           {token.verified && (
             <TooltipProvider delayDuration={300}>
               <Tooltip>
@@ -395,7 +395,7 @@ function TokenRow({
         <div className="truncate text-[11px] text-muted-foreground">{token.name}</div>
       </div>
       <div className="flex flex-col items-end gap-0.5">
-        <div className="text-sm font-semibold text-white">
+        <div className="text-sm font-semibold text-foreground">
           ${formatPrice(token.usdPrice)}
         </div>
         {token.change24h !== undefined && (
@@ -435,7 +435,7 @@ function TokenTile({
       title={token.name}
     >
       <TokenGlyph token={token} size="lg" />
-      <span className="text-[11px] font-semibold text-white">{token.symbol}</span>
+      <span className="text-[11px] font-semibold text-foreground">{token.symbol}</span>
       <span className="text-[9px] text-muted-foreground">${formatPrice(token.usdPrice)}</span>
     </button>
   );

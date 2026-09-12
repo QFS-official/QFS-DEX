@@ -46,7 +46,7 @@ export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
       >
         <div className="relative flex items-center justify-between border-b border-white/5 px-5 py-4">
           <div>
-            <DialogTitle className="text-base font-semibold text-white">
+            <DialogTitle className="text-base font-semibold text-foreground">
               Conectar wallet
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -55,7 +55,7 @@ export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
           </div>
           <button
             onClick={() => onOpenChange(false)}
-            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-white"
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
             aria-label="Cerrar"
           >
             <X className="h-4 w-4" />
@@ -89,7 +89,7 @@ export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
                 >
                   {/* Wallet glyph */}
                   <div
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-foreground"
                     style={{
                       background: `linear-gradient(135deg, ${w.gradient[0]}, ${w.gradient[1]})`,
                       boxShadow: `0 4px 12px ${w.gradient[0]}40`,
@@ -100,7 +100,7 @@ export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-white">{w.name}</span>
+                      <span className="text-sm font-semibold text-foreground">{w.name}</span>
                       {w.isProtocol ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-[#3B99EF]/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-[#3B99EF] ring-1 ring-[#3B99EF]/30">
                           QR
@@ -124,7 +124,7 @@ export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
                     {isConnectingThis ? (
                       <Loader2 className="h-4 w-4 animate-spin text-[#8b7cf6]" />
                     ) : (
-                      <ChevronDown className="h-4 w-4 -rotate-90 text-muted-foreground transition-transform group-hover:text-white" />
+                      <ChevronDown className="h-4 w-4 -rotate-90 text-muted-foreground transition-transform group-hover:text-foreground" />
                     )}
                   </div>
                 </button>
@@ -226,7 +226,7 @@ export function WalletConnectButton({
     return (
       <button
         onClick={() => onOpenModal()}
-        className="portal-pill flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium text-white/90 transition-colors hover:bg-white/[0.07]"
+        className="portal-pill flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium text-foreground/90 transition-colors hover:bg-white/[0.07]"
       >
         <span
           className="inline-block h-2 w-2 rounded-full"
@@ -240,7 +240,7 @@ export function WalletConnectButton({
     <button
       onClick={() => onOpenModal()}
       disabled={wallet.isConnecting}
-      className="portal-pill flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/[0.07] disabled:opacity-60"
+      className="portal-pill flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-foreground/90 transition-colors hover:bg-white/[0.07] disabled:opacity-60"
     >
       {wallet.isConnecting ? (
         <>

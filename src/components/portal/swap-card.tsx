@@ -29,6 +29,7 @@ import { TokenSelector } from "./token-selector";
 import { WalletConnectModal } from "./wallet-connect-modal";
 import { TokenPickerModal } from "./token-picker-modal";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useFavorites } from "@/lib/swap/favorites";
 import { addSwapRecord } from "@/lib/swap/history";
 
@@ -93,6 +94,7 @@ export function SwapCard({
   const [swapping, setSwapping] = useState(false);
   const [swappedTx, setSwappedTx] = useState<string | null>(null);
   const { toast } = useToast();
+  const { t } = useLanguage();
   const { isFavorite, toggle: toggleFavorite } = useFavorites();
 
   const tokens = useMemo(() => tokensForChain(chain), [chain]);
@@ -153,16 +155,16 @@ export function SwapCard({
   const pairFavorited = isFavorite(deSymbol, aSymbol, chain);
 
   const cta = (() => {
-    if (invalidPair) return { label: "Selecciona un token diferente", disabled: true };
+    if (invalidPair) return { label: t("swap.cta.invalid"), disabled: true };
     if (!chainEvm) {
-      return { label: "Solana requiere Phantom Wallet", disabled: true };
+      return { label: t("swap.cta.solana"), disabled: true };
     }
-    if (!connected) return { label: "Conectar billetera", disabled: false };
+    if (!connected) return { label: t("swap.cta.connect"), disabled: false };
     if (!walletChainMatches) {
-      return { label: `Cambiar a ${CHAINS[chain].name}`, disabled: false };
+      return { label: t("swap.cta.switchChain", { chain: CHAINS[chain].name }), disabled: false };
     }
-    if (!amount || amount <= 0) return { label: "Ingresa un monto", disabled: true };
-    return { label: "Swap", disabled: false };
+    if (!amount || amount <= 0) return { label: t("swap.cta.enterAmount"), disabled: true };
+    return { label: t("swap.cta.swap"), disabled: false };
   })();
 
   function setMax() {
@@ -269,7 +271,7 @@ export function SwapCard({
         {/* Sub-header: Swap title + utility icons */}
         <div className="flex items-center justify-between px-5 pt-5">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold tracking-tight text-white">Swap</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">Swap</h2>
           </div>
           <div className="flex items-center gap-1">
             <UtilityButton
@@ -297,7 +299,7 @@ export function SwapCard({
         <div className="px-5 pt-4">
           <div className="flex items-center justify-between">
             <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
-              Red
+              {t("swap.network")}
             </span>
             <NetworkSelector
               value={chain}
@@ -318,7 +320,7 @@ export function SwapCard({
               className="overflow-hidden"
             >
               <div className="mx-5 mt-3 rounded-xl border border-white/8 bg-white/[0.02] p-3">
-                <div className="mb-2 flex items-center gap-1.5 text-xs text-white">
+                <div className="mb-2 flex items-center gap-1.5 text-xs text-foreground">
                   <Settings2 className="h-3.5 w-3.5" /> Tolerancia de slippage
                 </div>
                 <div className="flex gap-1.5">
@@ -332,7 +334,7 @@ export function SwapCard({
                           "rounded-md px-2.5 py-1 text-xs ring-1 ring-white/8 " +
                           (active
                             ? "bg-[#8b7cf6]/15 text-[#b8a8ff] ring-[#8b7cf6]/40"
-                            : "bg-white/5 text-white/70 hover:bg-white/10")
+                            : "bg-white/5 text-foreground/70 hover:bg-white/10")
                         }
                       >
                         {s}
@@ -348,10 +350,10 @@ export function SwapCard({
         {/* De panel */}
         <div className="p-5 pb-2">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">De</span>
+            <span className="text-xs font-medium text-muted-foreground">{t("swap.from")}</span>
             <span className="text-[11px] text-muted-foreground">
               {connected ? (
-                <span className="inline-flex items-center gap-1.5 text-white/70">
+                <span className="inline-flex items-center gap-1.5 text-foreground/70">
                   <span
                     className="inline-block h-1.5 w-1.5 rounded-full"
                     style={{
@@ -361,7 +363,7 @@ export function SwapCard({
                   {wallet.shortAddress}
                 </span>
               ) : (
-                "No conectado"
+                t("swap.notConnected")
               )}
             </span>
           </div>
@@ -381,7 +383,7 @@ export function SwapCard({
                   const v = e.target.value.replace(/[^0-9.]/g, "");
                   onAmountChange(v);
                 }}
-                className="min-w-0 flex-1 bg-transparent text-3xl font-semibold text-white placeholder:text-white/25 focus:outline-none"
+                className="min-w-0 flex-1 bg-transparent text-3xl font-semibold text-foreground placeholder:text-foreground/25 focus:outline-none"
               />
             </div>
             <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
@@ -389,7 +391,7 @@ export function SwapCard({
               <button
                 onClick={setMax}
                 disabled={!deToken}
-                className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/80 ring-1 ring-white/8 transition-colors hover:bg-white/10 disabled:opacity-40"
+                className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-foreground/80 ring-1 ring-white/8 transition-colors hover:bg-white/10 disabled:opacity-40"
               >
                 Max
               </button>
@@ -402,7 +404,7 @@ export function SwapCard({
           <div className="absolute inset-x-0 top-1/2 -z-0 h-px -translate-y-1/2 bg-white/4" />
           <button
             onClick={swapSides}
-            className="portal-swap-button relative z-10 flex h-12 w-12 flex-col items-center justify-center rounded-full text-white"
+            className="portal-swap-button relative z-10 flex h-12 w-12 flex-col items-center justify-center rounded-full text-foreground"
             aria-label="Invertir De y A"
           >
             <ArrowDown className="h-3.5 w-3.5" />
@@ -412,10 +414,10 @@ export function SwapCard({
         {/* A panel */}
         <div className="px-5 pt-2 pb-5">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">A</span>
+            <span className="text-xs font-medium text-muted-foreground">{t("swap.to")}</span>
             <span className="text-[11px] text-muted-foreground">
               {ratio > 0 ? (
-                <span className="inline-flex items-center gap-1 text-white/70">
+                <span className="inline-flex items-center gap-1 text-foreground/70">
                   <TrendingUp className="h-3 w-3 text-[#8b7cf6]" />
                   1 {deToken?.symbol} ≈ {ratio.toFixed(ratio < 1 ? 6 : 2)} {aToken?.symbol}
                 </span>
@@ -440,12 +442,12 @@ export function SwapCard({
                     : ""
                 }
                 readOnly
-                className="min-w-0 flex-1 bg-transparent text-3xl font-semibold text-white/70 placeholder:text-white/25 focus:outline-none"
+                className="min-w-0 flex-1 bg-transparent text-3xl font-semibold text-foreground/70 placeholder:text-foreground/25 focus:outline-none"
               />
             </div>
             <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
               <span>≈ ${outputUsd.toFixed(2)}</span>
-              <span className="text-white/60">auto-ruta</span>
+              <span className="text-foreground/60">auto-ruta</span>
             </div>
           </div>
         </div>
@@ -474,7 +476,7 @@ export function SwapCard({
             {swapping ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Procesando…
+                {t("swap.cta.processing")}
               </>
             ) : (
               cta.label
@@ -487,7 +489,7 @@ export function SwapCard({
               animate={{ opacity: 1, y: 0 }}
               className="mt-3 flex items-center justify-between rounded-lg border border-[#8b7cf6]/30 bg-[#8b7cf6]/10 px-3 py-2 text-xs text-[#b8a8ff]"
             >
-              <span>Swap enviado</span>
+              <span>{t("swap.routeSent")}</span>
               <a
                 href={`${CHAINS[chain].explorer}/tx/${swappedTx}`}
                 target="_blank"
@@ -563,8 +565,8 @@ function UtilityButton({
       className={
         "rounded-lg p-2 transition-colors " +
         (active
-          ? "bg-white/10 text-white"
-          : "text-muted-foreground hover:bg-white/5 hover:text-white")
+          ? "bg-white/10 text-foreground"
+          : "text-muted-foreground hover:bg-white/5 hover:text-foreground")
       }
     >
       {children}
@@ -593,7 +595,7 @@ function TokenSelectorLarge({
         </div>
       )}
       <div className="min-w-0 text-left">
-        <div className="text-base font-semibold leading-tight text-white">
+        <div className="text-base font-semibold leading-tight text-foreground">
           {value?.symbol ?? "Select"}
         </div>
       </div>
@@ -606,7 +608,7 @@ function LargeTokenGlyph({ token }: { token: BridgeToken }) {
   return (
     <div className="relative h-11 w-11 shrink-0">
       <div
-        className="flex h-11 w-11 items-center justify-center rounded-full text-xs font-bold text-white"
+        className="flex h-11 w-11 items-center justify-center rounded-full text-xs font-bold text-foreground"
         style={{
           background: `linear-gradient(135deg, ${token.gradient[0]}, ${token.gradient[1]})`,
           boxShadow: `0 4px 12px ${token.gradient[0]}40`,
@@ -705,7 +707,7 @@ function RouteRow({
         {icon}
         {label}
       </span>
-      <span className="text-right text-white/85">{value}</span>
+      <span className="text-right text-foreground/85">{value}</span>
     </div>
   );
 }

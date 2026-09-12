@@ -39,7 +39,7 @@ export function FavoritePairs({
           "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ring-1 transition-colors " +
           (currentFavorited
             ? "bg-[#8b7cf6]/15 text-[#b8a8ff] ring-[#8b7cf6]/40 hover:bg-[#8b7cf6]/25"
-            : "bg-white/[0.04] text-muted-foreground ring-white/8 hover:text-white hover:bg-white/[0.07]")
+            : "bg-white/[0.04] text-muted-foreground ring-white/8 hover:text-foreground hover:bg-white/[0.07]")
         }
         title={currentFavorited ? "Quitar de favoritos" : "Añadir a favoritos"}
       >
@@ -74,12 +74,12 @@ export function FavoritePairs({
                 "group inline-flex items-center gap-1.5 rounded-full py-1 pl-1 pr-2 text-xs ring-1 transition-colors " +
                 (isCurrent
                   ? "bg-[#8b7cf6]/15 text-[#b8a8ff] ring-[#8b7cf6]/30"
-                  : "bg-white/[0.04] text-white/80 ring-white/8 hover:bg-white/[0.07]")
+                  : "bg-white/[0.04] text-foreground/80 ring-white/8 hover:bg-white/[0.07]")
               }
             >
               {/* Chain glyph (left) */}
               <span
-                className="flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-white"
+                className="flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-foreground"
                 style={{
                   background: `linear-gradient(135deg, ${chain.gradient[0]}, ${chain.gradient[1]})`,
                 }}

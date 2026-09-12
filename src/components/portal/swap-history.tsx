@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { CheckCircle2, Clock, ExternalLink, Trash2, XCircle } from "lucide-react";
 import { useSwapHistory, type SwapRecord } from "@/lib/swap/history";
 import { CHAINS } from "@/lib/bridge/chains";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import {
   Tooltip,
   TooltipContent,
@@ -18,6 +19,7 @@ interface Props {
 
 export function SwapHistory({ limit = 8 }: Props) {
   const { history, clear } = useSwapHistory();
+  const { t } = useLanguage();
   const records = history.slice(0, limit);
 
   return (
@@ -31,11 +33,11 @@ export function SwapHistory({ limit = 8 }: Props) {
       <div className="flex items-center justify-between border-b border-white/5 px-5 py-3.5">
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-[#8b7cf6]" />
-          <h3 className="text-sm font-semibold text-white">Swaps recientes</h3>
+          <h3 className="text-sm font-semibold text-foreground">{t("history.title")}</h3>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[11px] text-muted-foreground">
-            {history.length} {history.length === 1 ? "registro" : "registros"}
+            {history.length} {history.length === 1 ? t("history.record.singular") : t("history.record.plural")}
           </span>
           {history.length > 0 && (
             <TooltipProvider delayDuration={200}>
@@ -43,16 +45,16 @@ export function SwapHistory({ limit = 8 }: Props) {
                 <TooltipTrigger asChild>
                   <button
                     onClick={() => {
-                      if (confirm("¿Borrar todo el historial de swaps?")) clear();
+                      if (confirm(t("history.clearConfirm"))) clear();
                     }}
                     className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-white/5 hover:text-red-300"
-                    aria-label="Borrar historial"
+                    aria-label={t("history.clear")}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="left" className="text-xs">
-                  Borrar historial
+                  {t("history.clear")}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -66,10 +68,10 @@ export function SwapHistory({ limit = 8 }: Props) {
           <div className="flex flex-col items-center justify-center gap-2 px-5 py-10 text-center">
             <Clock className="h-6 w-6 text-muted-foreground/40" />
             <div className="text-sm text-muted-foreground">
-              Aún no has hecho swaps.
+              {t("history.empty.title")}
             </div>
             <div className="text-[11px] text-muted-foreground/70">
-              Tu historial aparecerá aquí.
+              {t("history.empty.desc")}
             </div>
           </div>
         ) : (
@@ -85,8 +87,9 @@ export function SwapHistory({ limit = 8 }: Props) {
 }
 
 function HistoryRow({ record, index }: { record: SwapRecord; index: number }) {
+  const { t } = useLanguage();
   const explorer = CHAINS[record.chain]?.explorer ?? "#";
-  const timeAgoText = formatRelativeTime(record.timestamp);
+  const timeAgoText = formatRelativeTime(record.timestamp, t);
 
   return (
     <motion.li
@@ -100,20 +103,20 @@ function HistoryRow({ record, index }: { record: SwapRecord; index: number }) {
 
       {/* Pair + amount */}
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5 text-sm font-medium text-white">
+        <div className="flex items-center gap-1.5 text-sm font-medium text-foreground">
           <span>{record.fromSymbol}</span>
           <span className="text-muted-foreground">→</span>
           <span>{record.toSymbol}</span>
         </div>
         <div className="text-[11px] text-muted-foreground">
           {trimNum(record.fromAmount)} {record.fromSymbol} ·{" "}
-          <span className="text-white/60">{trimNum(record.toAmount)} {record.toSymbol}</span>
+          <span className="text-foreground/60">{trimNum(record.toAmount)} {record.toSymbol}</span>
         </div>
       </div>
 
       {/* Right side: USD value, chain, time, link */}
       <div className="flex flex-col items-end gap-1 text-right">
-        <div className="text-xs font-semibold text-white">
+        <div className="text-xs font-semibold text-foreground">
           ${record.usdValue.toFixed(2)}
         </div>
         <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
@@ -125,7 +128,7 @@ function HistoryRow({ record, index }: { record: SwapRecord; index: number }) {
           href={`${explorer}/tx/${record.txHash}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 font-mono text-[10px] text-[#8b7cf6] transition-colors hover:text-white"
+          className="inline-flex items-center gap-1 font-mono text-[10px] text-[#8b7cf6] transition-colors hover:text-foreground"
           title="Ver en el explorador"
         >
           {record.txHash.slice(0, 6)}…{record.txHash.slice(-4)}
@@ -137,6 +140,7 @@ function HistoryRow({ record, index }: { record: SwapRecord; index: number }) {
 }
 
 function StatusIcon({ status }: { status: SwapRecord["status"] }) {
+  const { t } = useLanguage();
   if (status === "completed") {
     return (
       <TooltipProvider delayDuration={200}>
@@ -146,7 +150,7 @@ function StatusIcon({ status }: { status: SwapRecord["status"] }) {
               <CheckCircle2 className="h-3.5 w-3.5 text-[#14F195]" />
             </span>
           </TooltipTrigger>
-          <TooltipContent side="right" className="text-xs">Completado</TooltipContent>
+          <TooltipContent side="right" className="text-xs">{t("history.status.completed")}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
@@ -160,7 +164,7 @@ function StatusIcon({ status }: { status: SwapRecord["status"] }) {
               <Clock className="h-3.5 w-3.5 text-amber-300" />
             </span>
           </TooltipTrigger>
-          <TooltipContent side="right" className="text-xs">Pendiente</TooltipContent>
+          <TooltipContent side="right" className="text-xs">{t("history.status.pending")}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
@@ -173,7 +177,7 @@ function StatusIcon({ status }: { status: SwapRecord["status"] }) {
             <XCircle className="h-3.5 w-3.5 text-red-300" />
           </span>
         </TooltipTrigger>
-        <TooltipContent side="right" className="text-xs">Fallido</TooltipContent>
+        <TooltipContent side="right" className="text-xs">{t("history.status.failed")}</TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
@@ -186,16 +190,16 @@ function trimNum(n: number): string {
   return n.toFixed(6);
 }
 
-function formatRelativeTime(ts: number): string {
+function formatRelativeTime(ts: number, t: (key: string, params?: Record<string, string | number>) => string): string {
   const diff = Date.now() - ts;
   const s = Math.floor(diff / 1000);
-  if (s < 60) return "hace segundos";
+  if (s < 60) return t("history.ago.seconds");
   const m = Math.floor(s / 60);
-  if (m < 60) return `hace ${m} min`;
+  if (m < 60) return t("history.ago.minutes", { count: m });
   const h = Math.floor(m / 60);
-  if (h < 24) return `hace ${h} h`;
+  if (h < 24) return t("history.ago.hours", { count: h });
   const d = Math.floor(h / 24);
-  if (d < 30) return `hace ${d} d`;
+  if (d < 30) return t("history.ago.days", { count: d });
   const mo = Math.floor(d / 30);
-  return `hace ${mo} m`;
+  return t("history.ago.months", { count: mo });
 }

@@ -114,7 +114,7 @@ export function WalletConnectQRModal({
           <div className="flex items-center gap-2.5">
             {/* WC logo */}
             <div
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold text-white"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold text-foreground"
               style={{
                 background: "linear-gradient(135deg, #3B99EF 0%, #627EEA 100%)",
                 boxShadow: "0 4px 12px rgba(59, 153, 239, 0.4)",
@@ -123,7 +123,7 @@ export function WalletConnectQRModal({
               W
             </div>
             <div>
-              <DialogTitle className="text-base font-semibold text-white">
+              <DialogTitle className="text-base font-semibold text-foreground">
                 Escanear con WalletConnect
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
@@ -133,7 +133,7 @@ export function WalletConnectQRModal({
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-white"
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
             aria-label="Cerrar"
           >
             <X className="h-4 w-4" />
@@ -155,7 +155,7 @@ export function WalletConnectQRModal({
               {/* WC logo overlay in the center of the QR */}
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                 <div
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-[10px] font-bold text-white ring-4 ring-white"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-[10px] font-bold text-foreground ring-4 ring-white"
                   style={{
                     background: "linear-gradient(135deg, #3B99EF 0%, #627EEA 100%)",
                   }}
@@ -196,7 +196,7 @@ export function WalletConnectQRModal({
                   <TooltipTrigger asChild>
                     <button
                       onClick={copyUri}
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-white"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
                       aria-label="Copiar URI"
                     >
                       {copied ? (
@@ -249,7 +249,7 @@ export function WalletConnectQRModal({
 
           <button
             onClick={onClose}
-            className="flex w-full items-center justify-center gap-1.5 text-[11px] text-muted-foreground transition-colors hover:text-white"
+            className="flex w-full items-center justify-center gap-1.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
           >
             <RefreshCw className="h-3 w-3" />
             Cancelar y elegir otra wallet
@@ -365,7 +365,7 @@ function MobileWalletsTabs({ uri }: { uri: string | null }) {
       <TabsList className="grid w-full grid-cols-2 rounded-lg bg-white/[0.04] p-0.5 ring-1 ring-white/8">
         <TabsTrigger
           value="populares"
-          className="flex items-center gap-1.5 rounded-md py-1.5 text-[11px] font-medium data-[state=active]:bg-white/10 data-[state=active]:text-white text-muted-foreground data-[state=active]:shadow-none"
+          className="flex items-center gap-1.5 rounded-md py-1.5 text-[11px] font-medium data-[state=active]:bg-white/10 data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-none"
         >
           <Star className="h-2.5 w-2.5" />
           Populares
@@ -375,7 +375,7 @@ function MobileWalletsTabs({ uri }: { uri: string | null }) {
         </TabsTrigger>
         <TabsTrigger
           value="recientes"
-          className="flex items-center gap-1.5 rounded-md py-1.5 text-[11px] font-medium data-[state=active]:bg-white/10 data-[state=active]:text-white text-muted-foreground data-[state=active]:shadow-none"
+          className="flex items-center gap-1.5 rounded-md py-1.5 text-[11px] font-medium data-[state=active]:bg-white/10 data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-none"
         >
           <Clock className="h-2.5 w-2.5" />
           Recientes
@@ -396,13 +396,13 @@ function MobileWalletsTabs({ uri }: { uri: string | null }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar wallet…"
-            className="w-full rounded-lg bg-white/[0.04] py-1.5 pl-7 pr-7 text-[11px] text-white placeholder:text-muted-foreground/60 ring-1 ring-white/8 transition-colors focus:bg-white/[0.06] focus:outline-none focus:ring-[#8b7cf6]/40"
+            className="w-full rounded-lg bg-white/[0.04] py-1.5 pl-7 pr-7 text-[11px] text-foreground placeholder:text-muted-foreground/60 ring-1 ring-white/8 transition-colors focus:bg-white/[0.06] focus:outline-none focus:ring-[#8b7cf6]/40"
             aria-label="Buscar wallet"
           />
           {query && (
             <button
               onClick={() => setQuery("")}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-white"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
               aria-label="Limpiar búsqueda"
             >
               <X className="h-3 w-3" />
@@ -418,7 +418,7 @@ function MobileWalletsTabs({ uri }: { uri: string | null }) {
             </div>
             <button
               onClick={() => setQuery("")}
-              className="mt-1 rounded-md bg-white/5 px-2.5 py-1 text-[11px] text-white/80 ring-1 ring-white/8 transition-colors hover:bg-white/10"
+              className="mt-1 rounded-md bg-white/5 px-2.5 py-1 text-[11px] text-foreground/80 ring-1 ring-white/8 transition-colors hover:bg-white/10"
             >
               Limpiar búsqueda
             </button>
@@ -451,7 +451,7 @@ function MobileWalletsTabs({ uri }: { uri: string | null }) {
             </div>
             <button
               onClick={() => setTab("populares")}
-              className="mt-1 rounded-md bg-white/5 px-2.5 py-1 text-[11px] text-white/80 ring-1 ring-white/8 transition-colors hover:bg-white/10"
+              className="mt-1 rounded-md bg-white/5 px-2.5 py-1 text-[11px] text-foreground/80 ring-1 ring-white/8 transition-colors hover:bg-white/10"
             >
               Ver populares
             </button>
@@ -508,11 +508,11 @@ function MobileWalletTile({
             target={device === "desktop" ? "_blank" : "_self"}
             rel={device === "desktop" ? "noopener noreferrer" : undefined}
             onClick={onClick}
-            className="group flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.02] px-2.5 py-2 text-[11px] text-white/80 transition-all hover:border-[#8b7cf6]/40 hover:bg-white/[0.05]"
+            className="group flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.02] px-2.5 py-2 text-[11px] text-foreground/80 transition-all hover:border-[#8b7cf6]/40 hover:bg-white/[0.05]"
             title={actionLabel}
           >
             <div
-              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white"
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-foreground"
               style={{
                 background: `linear-gradient(135deg, ${wallet.gradient[0]}, ${wallet.gradient[1]})`,
               }}
@@ -527,7 +527,7 @@ function MobileWalletTile({
               />
             )}
             {device === "desktop" ? (
-              <ExternalLink className="h-2.5 w-2.5 shrink-0 text-muted-foreground/70 transition-colors group-hover:text-white" />
+              <ExternalLink className="h-2.5 w-2.5 shrink-0 text-muted-foreground/70 transition-colors group-hover:text-foreground" />
             ) : (
               <Smartphone className="h-2.5 w-2.5 shrink-0 text-[#8b7cf6] transition-colors group-hover:text-[#b8a8ff]" />
             )}

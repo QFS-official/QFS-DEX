@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ArrowUpRight, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const PARTNERS: { name: string; gradient: [string, string]; glyph: string }[] = [
   { name: "Uniswap", gradient: ["#FF007A", "#FF60AA"], glyph: "U" },
@@ -15,6 +16,7 @@ const PARTNERS: { name: string; gradient: [string, string]; glyph: string }[] = 
 ];
 
 export function MarketingPanel() {
+  const { t } = useLanguage();
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -33,22 +35,21 @@ export function MarketingPanel() {
       <div className="relative">
         <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-[#8b7cf6]/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#b8a8ff] ring-1 ring-[#8b7cf6]/30">
           <Sparkles className="h-3 w-3" />
-          QFS Routing
+          {t("marketing.swap.badge")}
         </div>
-        <h3 className="text-3xl font-semibold leading-tight tracking-tight text-white">
-          Swapea con el <span className="text-[#8b7cf6]">mejor precio</span>
+        <h3 className="text-3xl font-semibold leading-tight tracking-tight text-foreground">
+          {t("marketing.swap.title")}{" "}
+          <span className="text-[#8b7cf6]">{t("marketing.swap.title.highlight")}</span>
         </h3>
         <p className="mt-3 max-w-md text-sm text-muted-foreground">
-          Elige libremente entre las rutas de los principales agregadores DEX.
-          QFS Routing busca las mejores cotizaciones en más de 400 DEXs y
-          30 redes, con protección MEV y ejecución óptima.
+          {t("marketing.swap.desc")}
         </p>
       </div>
 
       {/* Partners grid */}
       <div className="relative mt-8">
         <div className="mb-3 text-[10px] uppercase tracking-widest text-muted-foreground">
-          Integrado con
+          {t("marketing.integrated")}
         </div>
         <div className="grid grid-cols-4 gap-3">
           {PARTNERS.map((p) => (
@@ -58,7 +59,7 @@ export function MarketingPanel() {
               title={p.name}
             >
               <div
-                className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold text-white"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold text-foreground"
                 style={{
                   background: `linear-gradient(135deg, ${p.gradient[0]}, ${p.gradient[1]})`,
                 }}
@@ -74,26 +75,26 @@ export function MarketingPanel() {
       {/* Stats */}
       <div className="relative mt-8 grid grid-cols-3 gap-4 border-t border-white/6 pt-6">
         <Stat value="400+" label="DEXs" />
-        <Stat value="30+" label="Redes" />
+        <Stat value="30+" label={t("marketing.bridge.networks")} />
         <Stat value="$2.4B" label="Volumen 24h" />
       </div>
 
       {/* Trust row */}
       <div className="relative mt-6 flex items-center gap-2 text-[11px] text-muted-foreground">
         <ShieldCheck className="h-3.5 w-3.5 text-[#8b7cf6]" />
-        <span>Audited by</span>
-        <span className="font-medium text-white/80">Trail of Bits</span>
+        <span>{t("marketing.audited")}</span>
+        <span className="font-medium text-foreground/80">Trail of Bits</span>
         <span>·</span>
         <Zap className="h-3.5 w-3.5 text-[#8b7cf6]" />
-        <span>MEV protection</span>
+        <span>{t("marketing.mev")}</span>
       </div>
 
       {/* CTA link */}
       <a
         href="#"
-        className="relative mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-[#8b7cf6] transition-colors hover:text-white"
+        className="relative mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-[#8b7cf6] transition-colors hover:text-foreground"
       >
-        Explora los mercados disponibles
+        {t("marketing.explore")}
         <ArrowUpRight className="h-3.5 w-3.5" />
       </a>
     </motion.div>
@@ -103,7 +104,7 @@ export function MarketingPanel() {
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div>
-      <div className="text-xl font-semibold text-white">{value}</div>
+      <div className="text-xl font-semibold text-foreground">{value}</div>
       <div className="text-[11px] text-muted-foreground">{label}</div>
     </div>
   );

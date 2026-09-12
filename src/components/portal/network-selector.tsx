@@ -34,19 +34,19 @@ export function NetworkSelector({ value, onChange, exclude = [], label }: Props)
         >
           <ChainGlyph chain={current} />
           <div className="min-w-0">
-            <div className="text-xs font-semibold leading-tight text-white">
+            <div className="text-xs font-semibold leading-tight text-foreground">
               {current.name}
             </div>
             <div className="text-[10px] leading-tight text-muted-foreground">
               {current.shortName}
             </div>
           </div>
-          <ChevronDown className="ml-1 h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:text-white" />
+          <ChevronDown className="ml-1 h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:text-foreground" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="min-w-[200px] rounded-xl border-white/10 bg-[#1a1832] p-1 text-white"
+        className="min-w-[200px] rounded-xl border-white/10 bg-[#1a1832] p-1 text-foreground"
       >
         {label && (
           <div className="px-2 py-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -83,7 +83,7 @@ export function NetworkSelector({ value, onChange, exclude = [], label }: Props)
 function ChainGlyph({ chain }: { chain: ChainConfig }) {
   return (
     <div
-      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
+      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-foreground"
       style={{
         background: `linear-gradient(135deg, ${chain.gradient[0]}, ${chain.gradient[1]})`,
         boxShadow: `0 2px 6px ${chain.gradient[0]}55`,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import {
   Area,
   AreaChart,
@@ -33,6 +34,7 @@ interface Props {
 }
 
 export function PriceChart({ fromSymbol, toSymbol, currentPrice, chainKey }: Props) {
+  const { t } = useLanguage();
   const [rangeId, setRangeId] = useState<RangeId>("1h");
   const range = PRICE_RANGES.find((r) => r.id === rangeId) ?? PRICE_RANGES[0];
 
@@ -71,7 +73,7 @@ export function PriceChart({ fromSymbol, toSymbol, currentPrice, chainKey }: Pro
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-base font-semibold text-white">
+            <span className="text-base font-semibold text-foreground">
               {fromSymbol}/{toSymbol}
             </span>
             <span className="rounded-md bg-white/5 px-1.5 py-0.5 text-[10px] uppercase tracking-widest text-muted-foreground ring-1 ring-white/8">
@@ -79,7 +81,7 @@ export function PriceChart({ fromSymbol, toSymbol, currentPrice, chainKey }: Pro
             </span>
           </div>
           <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-white">
+            <span className="text-2xl font-bold tracking-tight text-foreground">
               {last > 0 ? formatPrice(last) : "—"}
             </span>
             <span
@@ -106,8 +108,8 @@ export function PriceChart({ fromSymbol, toSymbol, currentPrice, chainKey }: Pro
                 className={
                   "rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors " +
                   (active
-                    ? "bg-white/10 text-white ring-1 ring-white/10"
-                    : "text-muted-foreground hover:text-white")
+                    ? "bg-white/10 text-foreground ring-1 ring-white/10"
+                    : "text-muted-foreground hover:text-foreground")
                 }
               >
                 {r.label}
@@ -182,12 +184,12 @@ export function PriceChart({ fromSymbol, toSymbol, currentPrice, chainKey }: Pro
 
       {/* Footer mini-stats */}
       <div className="mt-3 grid grid-cols-3 gap-3 text-[11px] text-muted-foreground">
-        <Stat label="Mín 24h" value={formatPrice(min)} color="text-white/80" />
-        <Stat label="Máx 24h" value={formatPrice(max)} color="text-white/80" />
+        <Stat label={t("chart.min")} value={formatPrice(min)} color="text-foreground/80" />
+        <Stat label={t("chart.max")} value={formatPrice(max)} color="text-foreground/80" />
         <Stat
-          label="Volatilidad"
+          label={t("chart.volatility")}
           value={`${(Math.abs(changePct) * 0.6).toFixed(2)}%`}
-          color="text-white/80"
+          color="text-foreground/80"
         />
       </div>
 
@@ -201,7 +203,7 @@ function Stat({ label, value, color }: { label: string; value: string; color?: s
   return (
     <div className="flex items-center justify-between rounded-md bg-white/[0.02] px-2 py-1.5 ring-1 ring-white/4">
       <span>{label}</span>
-      <span className={"font-medium " + (color ?? "text-white/80")}>{value}</span>
+      <span className={"font-medium " + (color ?? "text-foreground/80")}>{value}</span>
     </div>
   );
 }
@@ -218,6 +220,7 @@ interface ChartTooltipProps {
 }
 
 function ChartTooltip({ active, payload, fromSymbol, toSymbol, rangeId }: ChartTooltipProps) {
+  const { t } = useLanguage();
   if (!active || !payload || !payload.length) return null;
   const point = payload[0]?.payload;
   if (!point) return null;
@@ -226,9 +229,9 @@ function ChartTooltip({ active, payload, fromSymbol, toSymbol, rangeId }: ChartT
       <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
         {formatTooltipTime(point.t, rangeId)}
       </div>
-      <div className="mt-0.5 text-sm font-semibold text-white">
+      <div className="mt-0.5 text-sm font-semibold text-foreground">
         {formatPrice(point.p)} <span className="text-muted-foreground">{toSymbol}</span>
-        <span className="ml-1 text-[10px] text-muted-foreground">por 1 {fromSymbol}</span>
+        <span className="ml-1 text-[10px] text-muted-foreground">{t("chart.by", { symbol: fromSymbol })}</span>
       </div>
       <div className="mt-0.5 text-[10px] text-muted-foreground">
         Vol: {point.v.toFixed(2)}

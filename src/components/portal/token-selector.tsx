@@ -32,7 +32,7 @@ export function TokenSelector({ value, options, onChange, disabled }: Props) {
             </div>
           )}
           <div className="min-w-0">
-            <div className="text-xs font-semibold leading-tight text-white">
+            <div className="text-xs font-semibold leading-tight text-foreground">
               {value?.symbol ?? "Select"}
             </div>
             <div className="text-[10px] leading-tight text-muted-foreground">
@@ -44,7 +44,7 @@ export function TokenSelector({ value, options, onChange, disabled }: Props) {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="min-w-[220px] rounded-xl border-white/10 bg-[#1a1832] p-1 text-white"
+        className="min-w-[220px] rounded-xl border-white/10 bg-[#1a1832] p-1 text-foreground"
       >
         <div className="px-2 py-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
           Select a token
@@ -79,7 +79,7 @@ export function TokenSelector({ value, options, onChange, disabled }: Props) {
 export function TokenGlyph({ token }: { token: BridgeToken }) {
   return (
     <div
-      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-foreground"
       style={{
         background: `linear-gradient(135deg, ${token.gradient[0]}, ${token.gradient[1]})`,
         boxShadow: `0 2px 6px ${token.gradient[0]}55`,

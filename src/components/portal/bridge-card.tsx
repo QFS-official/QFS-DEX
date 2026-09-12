@@ -233,13 +233,13 @@ export function BridgeCard({ wallet }: { wallet: ReturnType<typeof useWallet> })
                   boxShadow: "0 4px 12px rgba(139, 124, 246, 0.5)",
                 }}
               />
-              <Sparkles className="absolute inset-0 m-auto h-3.5 w-3.5 text-white" />
+              <Sparkles className="absolute inset-0 m-auto h-3.5 w-3.5 text-foreground" />
             </div>
-            <h1 className="text-lg font-semibold tracking-tight text-white">Swap</h1>
+            <h1 className="text-lg font-semibold tracking-tight text-foreground">Swap</h1>
           </div>
           <button
             onClick={() => setShowSettings((s) => !s)}
-            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-white/5 hover:text-white"
+            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
             aria-label="Settings"
           >
             <Settings2 className="h-4 w-4" />
@@ -256,7 +256,7 @@ export function BridgeCard({ wallet }: { wallet: ReturnType<typeof useWallet> })
               className="overflow-hidden"
             >
               <div className="mx-5 mt-3 rounded-xl border border-white/8 bg-white/[0.02] p-3 text-xs text-muted-foreground">
-                <div className="mb-2 flex items-center gap-1.5 text-white">
+                <div className="mb-2 flex items-center gap-1.5 text-foreground">
                   <Cog className="h-3.5 w-3.5" /> Slippage tolerance
                 </div>
                 <div className="flex gap-1.5">
@@ -267,7 +267,7 @@ export function BridgeCard({ wallet }: { wallet: ReturnType<typeof useWallet> })
                         "rounded-md px-2 py-1 ring-1 ring-white/8 " +
                         (i === 1
                           ? "bg-[#8b7cf6]/15 text-[#b8a8ff] ring-[#8b7cf6]/40"
-                          : "bg-white/5 text-white/70 hover:bg-white/10")
+                          : "bg-white/5 text-foreground/70 hover:bg-white/10")
                       }
                     >
                       {s}
@@ -313,7 +313,7 @@ export function BridgeCard({ wallet }: { wallet: ReturnType<typeof useWallet> })
                   const v = e.target.value.replace(/[^0-9.]/g, "");
                   setFrom({ ...from, amount: v });
                 }}
-                className="min-w-0 flex-1 bg-transparent text-3xl font-semibold text-white placeholder:text-white/25 focus:outline-none"
+                className="min-w-0 flex-1 bg-transparent text-3xl font-semibold text-foreground placeholder:text-foreground/25 focus:outline-none"
               />
               <button
                 onClick={setMax}
@@ -325,7 +325,7 @@ export function BridgeCard({ wallet }: { wallet: ReturnType<typeof useWallet> })
             </div>
             <div className="mt-1 text-xs text-muted-foreground">
               ≈ ${usdValue.toFixed(2)} ·{" "}
-              <span className="text-white/60">
+              <span className="text-foreground/60">
                 Bal:{" "}
                 {from.token?.symbol === "BNB"
                   ? "1.25"
@@ -346,7 +346,7 @@ export function BridgeCard({ wallet }: { wallet: ReturnType<typeof useWallet> })
         <div className="relative -mt-2 flex justify-center">
           <button
             onClick={swapPanels}
-            className="portal-swap-button relative z-10 flex h-10 w-10 items-center justify-center rounded-full text-white"
+            className="portal-swap-button relative z-10 flex h-10 w-10 items-center justify-center rounded-full text-foreground"
             aria-label="Swap source and destination"
           >
             <ArrowDownUp className="h-4 w-4" />
@@ -384,12 +384,12 @@ export function BridgeCard({ wallet }: { wallet: ReturnType<typeof useWallet> })
                 placeholder="0"
                 value={from.amount && to.token ? destinationAmount.toFixed(6).replace(/\.?0+$/, "") : ""}
                 readOnly
-                className="min-w-0 flex-1 bg-transparent text-3xl font-semibold text-white/80 placeholder:text-white/25 focus:outline-none"
+                className="min-w-0 flex-1 bg-transparent text-3xl font-semibold text-foreground/80 placeholder:text-foreground/25 focus:outline-none"
               />
             </div>
             <div className="mt-1 text-xs text-muted-foreground">
               ≈ ${((destinationAmount || 0) * (to.token?.usdPrice ?? 0)).toFixed(2)} ·{" "}
-              <span className="text-white/60">auto-routed</span>
+              <span className="text-foreground/60">auto-routed</span>
             </div>
           </div>
         </div>
@@ -547,7 +547,7 @@ function RouteRow({
         {icon}
         {label}
       </span>
-      <span className="text-right text-white/85">{value}</span>
+      <span className="text-right text-foreground/85">{value}</span>
     </div>
   );
 }

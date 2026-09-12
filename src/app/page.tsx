@@ -12,6 +12,7 @@ import { SwapHistory } from "@/components/portal/swap-history";
 import { FavoritePairs } from "@/components/portal/favorite-pairs";
 import { WalletConnectQRModal } from "@/components/portal/walletconnect-qr-modal";
 import { useWallet } from "@/hooks/use-wallet";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import {
   CHAINS,
   NATIVE_BY_CHAIN,
@@ -22,6 +23,7 @@ import type { FavoritePair } from "@/lib/swap/favorites";
 
 export default function Home() {
   const wallet = useWallet();
+  const { t } = useLanguage();
   const [mode, setMode] = useState<BridgeMode>("swap");
 
   // ─── Swap mode trade state (lifted so chart + favorites + history can read it) ───
@@ -81,17 +83,17 @@ export default function Home() {
           {/* ─── Left column: favorites + swap card ─── */}
           <div className="flex flex-1 flex-col gap-3 lg:flex-none lg:w-[460px]">
             <div className="text-center">
-              <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                {mode === "swap" && "Swap entre tokens"}
-                {mode === "dca" && "Compra programada (DCA)"}
-                {mode === "bridge" && "Bridge cross-chain"}
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                {mode === "swap" && t("subtitle.swap")}
+                {mode === "dca" && t("subtitle.dca")}
+                {mode === "bridge" && t("subtitle.bridge")}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                {mode === "swap" && "Mejor precio vía QFS Routing en 400+ DEXs y 30+ redes."}
-                {mode === "dca" && "Configura compras recurrentes automáticas."}
-                {mode === "bridge" && "Transfiere activos entre BNB, Polygon, Solana y Ethereum."}
+                {mode === "swap" && t("subtitle.swap.desc")}
+                {mode === "dca" && t("subtitle.dca.desc")}
+                {mode === "bridge" && t("subtitle.bridge.desc")}
                 {selectedChain.evmChainId === wallet.chainId && wallet.address
-                  ? ` Conectado a ${selectedChain.name}.`
+                  ? " " + t("subtitle.connected", { chain: selectedChain.name })
                   : ""}
               </p>
             </div>
@@ -100,7 +102,7 @@ export default function Home() {
             {mode === "swap" && (
               <div className="rounded-2xl border border-white/6 bg-white/[0.02] p-3">
                 <div className="mb-2 flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
-                  <Star className="h-3 w-3" /> Pares favoritos
+                  <Star className="h-3 w-3" /> {t("favorites.title")}
                 </div>
                 <FavoritePairs
                   currentFrom={deSymbol}
@@ -125,19 +127,18 @@ export default function Home() {
               />
             )}
             {mode === "bridge" && <BridgeCard wallet={wallet} />}
-            {mode === "dca" && <ComingSoonCard label="DCA — próximamente" />}
+            {mode === "dca" && <ComingSoonCard label={t("dca.comingSoon")} desc={t("dca.comingSoon.desc")} />}
 
             {/* Helper note for Solana */}
             <div className="max-w-md text-center text-[11px] text-muted-foreground">
-              MetaMask y Coinbase Wallet conectan BNB Chain, Polygon y Ethereum.
-              Para Solana, instala{" "}
+              {t("bridge.help.solana")}{" "}
               <a
                 href="https://phantom.app/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#8b7cf6] underline-offset-2 hover:underline"
               >
-                Phantom Wallet
+                {t("bridge.phantom")}
               </a>
               .
             </div>
@@ -188,7 +189,7 @@ function Star({ className }: { className?: string }) {
   );
 }
 
-function ComingSoonCard({ label }: { label: string }) {
+function ComingSoonCard({ label, desc }: { label: string; desc: string }) {
   return (
     <div className="portal-card flex w-full max-w-md flex-col items-center justify-center gap-3 rounded-3xl px-6 py-16 text-center">
       <div
@@ -200,11 +201,8 @@ function ComingSoonCard({ label }: { label: string }) {
       >
         🚀
       </div>
-      <h3 className="text-lg font-semibold text-white">{label}</h3>
-      <p className="max-w-xs text-sm text-muted-foreground">
-        Estamos trabajando en esta función. Mientras tanto, usa Swap para
-        operar en la misma red o Bridge para mover activos entre cadenas.
-      </p>
+      <h3 className="text-lg font-semibold text-foreground">{label}</h3>
+      <p className="max-w-xs text-sm text-muted-foreground">{desc}</p>
     </div>
   );
 }
@@ -214,6 +212,7 @@ function ComingSoonCard({ label }: { label: string }) {
  * Swap-side MarketingPanel but emphasizes cross-chain specifics.
  */
 function BridgeMarketingPanel() {
+  const { t } = useLanguage();
   return (
     <div className="hidden w-full flex-col justify-between rounded-3xl border border-white/8 bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-8 lg:flex">
       <div
@@ -224,15 +223,14 @@ function BridgeMarketingPanel() {
       />
       <div className="relative">
         <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-[#8b7cf6]/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#b8a8ff] ring-1 ring-[#8b7cf6]/30">
-          QFS Swap Bridge
+          {t("marketing.bridge.badge")}
         </div>
-        <h3 className="text-3xl font-semibold leading-tight tracking-tight text-white">
-          Mueve activos <span className="text-[#8b7cf6]">entre redes</span>
+        <h3 className="text-3xl font-semibold leading-tight tracking-tight text-foreground">
+          {t("marketing.bridge.title")}{" "}
+          <span className="text-[#8b7cf6]">{t("marketing.bridge.title.highlight")}</span>
         </h3>
         <p className="mt-3 max-w-md text-sm text-muted-foreground">
-          QFS Swap transfiere tokens nativos y wrapped entre BNB Chain,
-          Polygon, Solana y Ethereum usando el protocolo Wormhole.
-          Sin custodia, con hasta 5 confirmaciones de seguridad.
+          {t("marketing.bridge.desc")}
         </p>
       </div>
 
@@ -243,7 +241,7 @@ function BridgeMarketingPanel() {
             className="flex items-center gap-2.5 rounded-2xl border border-white/6 bg-white/[0.02] p-3 transition-colors hover:border-white/12 hover:bg-white/[0.05]"
           >
             <div
-              className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-foreground"
               style={{
                 background: `linear-gradient(135deg, ${c.gradient[0]}, ${c.gradient[1]})`,
               }}
@@ -251,7 +249,7 @@ function BridgeMarketingPanel() {
               {c.glyph}
             </div>
             <div>
-              <div className="text-sm font-semibold text-white">{c.name}</div>
+              <div className="text-sm font-semibold text-foreground">{c.name}</div>
               <div className="text-[11px] text-muted-foreground">
                 {c.shortName} · {c.bridgeTime}
               </div>
@@ -261,15 +259,15 @@ function BridgeMarketingPanel() {
       </div>
 
       <div className="relative mt-8 grid grid-cols-3 gap-4 border-t border-white/6 pt-6">
-        <Stat value="$8.4B" label="Volumen total" />
-        <Stat value="4" label="Redes" />
-        <Stat value="<5m" label="Tiempo medio" />
+        <Stat value="$8.4B" label={t("marketing.bridge.volume")} />
+        <Stat value="4" label={t("marketing.bridge.networks")} />
+        <Stat value="<5m" label={t("marketing.bridge.time")} />
       </div>
 
       <div className="relative mt-6 flex items-center gap-2 text-[11px] text-muted-foreground">
         <ShieldCheck className="h-3.5 w-3.5 text-[#8b7cf6]" />
-        <span>Audited by</span>
-        <span className="font-medium text-white/80">Trail of Bits</span>
+        <span>{t("marketing.audited")}</span>
+        <span className="font-medium text-foreground/80">Trail of Bits</span>
         <span>·</span>
         <span>Non-custodial</span>
       </div>
@@ -280,7 +278,7 @@ function BridgeMarketingPanel() {
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div>
-      <div className="text-xl font-semibold text-white">{value}</div>
+      <div className="text-xl font-semibold text-foreground">{value}</div>
       <div className="text-[11px] text-muted-foreground">{label}</div>
     </div>
   );
