@@ -2,14 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { ChevronDown, Loader2, ShieldCheck, X } from "lucide-react";
-import { useWallet, type WalletKind } from "@/hooks/use-wallet";
+import { useWallet, WALLETS, type WalletKind } from "@/hooks/use-wallet";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 
 interface Props {
   open: boolean;
@@ -17,40 +16,12 @@ interface Props {
   wallet: ReturnType<typeof useWallet>;
 }
 
-interface WalletMeta {
-  id: WalletKind;
-  name: string;
-  description: string;
-  gradient: [string, string];
-  glyph: string;
-}
-
-const WALLETS: WalletMeta[] = [
-  {
-    id: "metamask",
-    name: "MetaMask",
-    description: "Connect with the MetaMask browser extension",
-    gradient: ["#F6851B", "#E2761B"],
-    glyph: "M",
-  },
-  {
-    id: "coinbase",
-    name: "Coinbase Wallet",
-    description: "Connect with the Coinbase Wallet extension",
-    gradient: ["#0052FF", "#1A56FF"],
-    glyph: "C",
-  },
-];
-
 export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
   const [connecting, setConnecting] = useState<WalletKind | null>(null);
 
   // Reset the "connecting" indicator whenever the modal closes.
-  // Implemented via a key on the close button rather than setState-in-effect
-  // to satisfy the React hooks lint rule.
   useEffect(() => {
     if (!open) {
-      // schedule reset on next tick — this avoids the synchronous setState in effect warning
       const t = window.setTimeout(() => setConnecting(null), 0);
       return () => window.clearTimeout(t);
     }
@@ -63,6 +34,8 @@ export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
     setConnecting(null);
   }
 
+  const anyInstalled = WALLETS.some((w) => wallet.installed[w.id]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -72,16 +45,16 @@ export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
         <div className="relative flex items-center justify-between border-b border-white/5 px-5 py-4">
           <div>
             <DialogTitle className="text-base font-semibold text-white">
-              Connect a wallet
+              Conectar wallet
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Choose how you want to connect
+              Elige cómo quieres conectarte
             </DialogDescription>
           </div>
           <button
             onClick={() => onOpenChange(false)}
             className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-white"
-            aria-label="Close"
+            aria-label="Cerrar"
           >
             <X className="h-4 w-4" />
           </button>
@@ -112,11 +85,16 @@ export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold text-white">{w.name}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-white">{w.name}</span>
+                    {installed && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#14F195]/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-[#14F195] ring-1 ring-[#14F195]/30">
+                        Detectada
+                      </span>
+                    )}
+                  </div>
                   <div className="truncate text-xs text-muted-foreground">
-                    {installed
-                      ? w.description
-                      : "Not installed — click to launch installer"}
+                    {installed ? w.description : "No instalada — abre el instalador"}
                   </div>
                 </div>
 
@@ -140,31 +118,27 @@ export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
           <div className="mt-3 flex items-start gap-2 rounded-lg bg-white/[0.02] px-3 py-2 text-[11px] text-muted-foreground">
             <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#8b7cf6]" />
             <p>
-              By connecting, you agree to the Terms of Service. Your wallet stays in
-              control of your keys — Portal Bridge never holds custody of your funds.
+              Al conectar, aceptas los Términos de Servicio. Tu wallet mantiene
+              el control de tus claves — Portal Bridge nunca custodia tus fondos.
             </p>
           </div>
 
-          {!wallet.installed.metamask && !wallet.installed.coinbase && (
+          {!anyInstalled && (
             <p className="mt-1 text-center text-[11px] text-muted-foreground">
-              Don&apos;t see your wallet?{" "}
-              <a
-                href="https://metamask.io/download/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#8b7cf6] hover:underline"
-              >
-                Install MetaMask
-              </a>{" "}
-              or{" "}
-              <a
-                href="https://www.coinbase.com/wallet/downloads"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#8b7cf6] hover:underline"
-              >
-                Coinbase Wallet
-              </a>
+              ¿No ves tu wallet?{" "}
+              {WALLETS.map((w, i) => (
+                <span key={w.id}>
+                  <a
+                    href={w.installUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#8b7cf6] hover:underline"
+                  >
+                    Instalar {w.name}
+                  </a>
+                  {i < WALLETS.length - 1 ? " · " : ""}
+                </span>
+              ))}
               .
             </p>
           )}
@@ -185,11 +159,8 @@ export function ConnectionBadge({
   source?: boolean;
 }) {
   const connected = !!wallet.address;
-  const label = connected
-    ? wallet.kind === "metamask"
-      ? "MetaMask"
-      : "Coinbase"
-    : "Not connected";
+  const meta = connected && wallet.kind ? WALLETS.find((w) => w.id === wallet.kind) : null;
+  const label = meta?.shortLabel ?? (connected ? "Wallet" : "No conectado");
   const shortAddr = wallet.shortAddress;
 
   return (
@@ -224,39 +195,37 @@ export function WalletConnectButton({
   onOpenModal: () => void;
 }) {
   if (wallet.address) {
+    const meta = wallet.kind ? WALLETS.find((w) => w.id === wallet.kind) : null;
+    const gradient = meta
+      ? `linear-gradient(135deg, ${meta.gradient[0]}, ${meta.gradient[1]})`
+      : "linear-gradient(135deg, #8b7cf6, #7c6cf0)";
     return (
-      <Button
-        variant="outline"
+      <button
         onClick={() => onOpenModal()}
-        className="portal-pill border-white/10 bg-white/5 text-xs font-medium text-white/80 hover:text-white"
+        className="portal-pill flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium text-white/90 transition-colors hover:bg-white/[0.07]"
       >
         <span
           className="inline-block h-2 w-2 rounded-full"
-          style={{
-            background:
-              wallet.kind === "metamask"
-                ? "linear-gradient(135deg, #F6851B, #E2761B)"
-                : "linear-gradient(135deg, #0052FF, #1A56FF)",
-          }}
+          style={{ background: gradient }}
         />
         <span className="font-mono">{wallet.shortAddress}</span>
-      </Button>
+      </button>
     );
   }
   return (
-    <Button
+    <button
       onClick={() => onOpenModal()}
       disabled={wallet.isConnecting}
-      className="portal-pill border-white/10 bg-white/5 text-sm font-medium text-white/80 hover:text-white"
+      className="portal-pill flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/[0.07] disabled:opacity-60"
     >
       {wallet.isConnecting ? (
         <>
-          <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-          Connecting…
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          Conectando…
         </>
       ) : (
-        <>Connect wallet</>
+        <>Conectar wallet</>
       )}
-    </Button>
+    </button>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeftRight, ExternalLink, Loader2, ShieldCheck } from "lucide-react";
-import type { useWallet } from "@/hooks/use-wallet";
+import { useWallet, WALLETS } from "@/hooks/use-wallet";
 import { CHAINS } from "@/lib/bridge/chains";
 
 interface HeaderProps {
@@ -67,11 +67,18 @@ function WalletPill({
   wallet: ReturnType<typeof useWallet>;
   onOpenWallet?: () => void;
 }) {
+  // Look up the connected wallet's metadata to render the correct brand color
+  const meta = wallet.kind ? WALLETS.find((w) => w.id === wallet.kind) : null;
+  const dotGradient = meta
+    ? `linear-gradient(135deg, ${meta.gradient[0]}, ${meta.gradient[1]})`
+    : "linear-gradient(135deg, #8b7cf6, #7c6cf0)";
+  const dotGlow = meta ? meta.gradient[0] : "#8b7cf6";
+
   return (
     <button
       onClick={() => onOpenWallet?.()}
       className="portal-pill flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium text-white/90 transition-colors hover:bg-white/[0.07]"
-      aria-label={wallet.address ? `Connected as ${wallet.shortAddress}` : "Connect wallet"}
+      aria-label={wallet.address ? `Conectado como ${wallet.shortAddress}` : "Conectar wallet"}
     >
       {wallet.isConnecting ? (
         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -79,11 +86,8 @@ function WalletPill({
         <span
           className="inline-block h-2 w-2 rounded-full"
           style={{
-            background:
-              wallet.kind === "metamask"
-                ? "linear-gradient(135deg, #F6851B, #E2761B)"
-                : "linear-gradient(135deg, #0052FF, #1A56FF)",
-            boxShadow: `0 0 8px ${wallet.kind === "metamask" ? "#F6851B" : "#0052FF"}`,
+            background: dotGradient,
+            boxShadow: `0 0 8px ${dotGlow}`,
           }}
         />
       ) : (
@@ -93,8 +97,8 @@ function WalletPill({
         {wallet.address
           ? wallet.shortAddress
           : wallet.isConnecting
-            ? "Connecting…"
-            : "Connect wallet"}
+            ? "Conectando…"
+            : "Conectar wallet"}
       </span>
     </button>
   );

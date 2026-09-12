@@ -23,12 +23,22 @@ import {
   NATIVE_BY_CHAIN,
   tokensForChain,
 } from "@/lib/bridge/chains";
-import { useWallet } from "@/hooks/use-wallet";
+import { useWallet, WALLETS, type WalletKind } from "@/hooks/use-wallet";
 import { NetworkSelector } from "./network-selector";
 import { TokenSelector } from "./token-selector";
+import { WalletConnectModal } from "./wallet-connect-modal";
 import { useToast } from "@/hooks/use-toast";
 import { useFavorites } from "@/lib/swap/favorites";
 import { addSwapRecord } from "@/lib/swap/history";
+
+/** Returns the brand gradient for a connected wallet (or a lavender fallback). */
+function walletDotGradient(kind: WalletKind | null): string {
+  if (!kind) return "linear-gradient(135deg, #8b7cf6, #7c6cf0)";
+  const meta = WALLETS.find((w) => w.id === kind);
+  return meta
+    ? `linear-gradient(135deg, ${meta.gradient[0]}, ${meta.gradient[1]})`
+    : "linear-gradient(135deg, #8b7cf6, #7c6cf0)";
+}
 
 interface SwapPanelState {
   token: BridgeToken | null;
@@ -343,10 +353,7 @@ export function SwapCard({
                   <span
                     className="inline-block h-1.5 w-1.5 rounded-full"
                     style={{
-                      background:
-                        wallet.kind === "metamask"
-                          ? "linear-gradient(135deg, #F6851B, #E2761B)"
-                          : "linear-gradient(135deg, #0052FF, #1A56FF)",
+                      background: walletDotGradient(wallet.kind),
                     }}
                   />
                   {wallet.shortAddress}
@@ -511,6 +518,12 @@ export function SwapCard({
           )}
         </div>
       </motion.div>
+
+      <WalletConnectModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        wallet={wallet}
+      />
     </div>
   );
 }

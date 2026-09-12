@@ -9,6 +9,9 @@ import { CHAINS, type ChainId } from "@/lib/bridge/chains";
 type Eip1193Provider = {
   isMetaMask?: boolean;
   isCoinbaseWallet?: boolean;
+  isTrust?: boolean;
+  isTrustWallet?: boolean;
+  isBinance?: boolean;
   isRabby?: boolean;
   request: (args: { method: string; params?: unknown[] | object }) => Promise<unknown>;
   on?: (event: string, handler: (...args: unknown[]) => void) => void;
@@ -22,7 +25,12 @@ type EthereumProvider = Eip1193Provider & {
 declare global {
   interface Window {
     ethereum?: EthereumProvider;
+    /** Coinbase Wallet dedicated global (in addition to window.ethereum) */
     coinbaseWalletExtension?: Eip1193Provider;
+    /** Trust Wallet dedicated global (extension) */
+    trustwallet?: Eip1193Provider;
+    /** Binance Web3 Wallet / Binance Chain Wallet — separate EIP-1193 provider */
+    BinanceChain?: Eip1193Provider;
   }
 }
 
@@ -37,7 +45,70 @@ const RPC_URLS: Record<ChainId, string> = {
   solana: "", // not EVM — never used
 };
 
-export type WalletKind = "metamask" | "coinbase";
+export type WalletKind = "metamask" | "coinbase" | "trust" | "binance";
+
+export interface WalletMeta {
+  id: WalletKind;
+  name: string;
+  shortLabel: string;
+  description: string;
+  gradient: [string, string];
+  glyph: string;
+  /** URL to install the wallet (opened when wallet is not detected) */
+  installUrl: string;
+}
+
+export const WALLETS: WalletMeta[] = [
+  {
+    id: "metamask",
+    name: "MetaMask",
+    shortLabel: "MetaMask",
+    description: "Conéctate con la extensión de MetaMask",
+    gradient: ["#F6851B", "#E2761B"],
+    glyph: "M",
+    installUrl: "https://metamask.io/download/",
+  },
+  {
+    id: "trust",
+    name: "Trust Wallet",
+    shortLabel: "Trust",
+    description: "Conéctate con la extensión de Trust Wallet",
+    gradient: ["#3375BB", "#0EA88B"],
+    glyph: "T",
+    installUrl: "https://www.trustwallet.com/download",
+  },
+  {
+    id: "coinbase",
+    name: "Coinbase Wallet",
+    shortLabel: "Coinbase",
+    description: "Conéctate con la extensión de Coinbase Wallet",
+    gradient: ["#0052FF", "#1A56FF"],
+    glyph: "C",
+    installUrl: "https://www.coinbase.com/wallet/downloads",
+  },
+  {
+    id: "binance",
+    name: "Binance Web3 Wallet",
+    shortLabel: "Binance",
+    description: "Conéctate con la Binance Web3 Wallet",
+    gradient: ["#F0B90B", "#F8D12F"],
+    glyph: "B",
+    installUrl: "https://www.binance.com/en/web3wallet",
+  },
+];
+
+export const WALLET_META: Record<WalletKind, WalletMeta> = WALLETS.reduce(
+  (acc, w) => {
+    acc[w.id] = w;
+    return acc;
+  },
+  {} as Record<WalletKind, WalletMeta>,
+);
+
+export function getWalletMeta(kind: WalletKind | null): WalletMeta | null {
+  if (!kind) return null;
+  return WALLET_META[kind] ?? null;
+}
 
 export interface WalletState {
   kind: WalletKind | null;
@@ -55,42 +126,88 @@ const INITIAL: WalletState = {
   error: null,
 };
 
+/**
+ * Pick the EIP-1193 provider for a given wallet kind. Wallets that inject their
+ * own dedicated global (`coinbaseWalletExtension`, `trustwallet`, `BinanceChain`)
+ * are detected first; we then fall back to the multi-injected `window.ethereum`
+ * with `providers` array, and finally to the single-injected `window.ethereum`.
+ */
 function pickProvider(kind: WalletKind): Eip1193Provider | null {
   if (typeof window === "undefined") return null;
 
-  // Coinbase injects its own dedicated global in addition to window.ethereum
+  // Dedicated globals first
   if (kind === "coinbase" && window.coinbaseWalletExtension) {
     return window.coinbaseWalletExtension;
   }
+  if (kind === "trust" && window.trustwallet) {
+    return window.trustwallet;
+  }
+  if (kind === "binance" && window.BinanceChain) {
+    return window.BinanceChain;
+  }
+
+  // Binance only ever exposes its dedicated global — never window.ethereum
+  if (kind === "binance") return null;
 
   const ethereum = window.ethereum;
   if (!ethereum) return null;
 
   // Modern multi-injected provider wallets expose `providers`
   if (Array.isArray(ethereum.providers) && ethereum.providers.length) {
-    const match = ethereum.providers.find((p) =>
-      kind === "metamask" ? p.isMetaMask === true : p.isCoinbaseWallet === true,
-    );
+    const match = ethereum.providers.find((p) => {
+      switch (kind) {
+        case "metamask":
+          return p.isMetaMask === true && p.isCoinbaseWallet !== true && p.isTrust !== true;
+        case "coinbase":
+          return p.isCoinbaseWallet === true;
+        case "trust":
+          return p.isTrust === true || p.isTrustWallet === true;
+        default:
+          return false;
+      }
+    });
     if (match) return match;
   }
 
   // Single-injected fallback
-  if (kind === "metamask" && ethereum.isMetaMask) return ethereum;
+  if (kind === "metamask" && ethereum.isMetaMask) {
+    // If the only provider is also tagged as Trust/Coinbase, skip — that's not MetaMask
+    if (ethereum.isTrust || ethereum.isTrustWallet || ethereum.isCoinbaseWallet) return null;
+    return ethereum;
+  }
   if (kind === "coinbase" && ethereum.isCoinbaseWallet) return ethereum;
+  if (kind === "trust" && (ethereum.isTrust || ethereum.isTrustWallet)) return ethereum;
   return null;
 }
 
 function isWalletInstalled(kind: WalletKind): boolean {
   if (typeof window === "undefined") return false;
   if (kind === "coinbase" && window.coinbaseWalletExtension) return true;
+  if (kind === "trust" && window.trustwallet) return true;
+  if (kind === "binance" && window.BinanceChain) return true;
   const eth = window.ethereum;
+  if (kind === "binance") return false; // Binance only via dedicated global
   if (!eth) return false;
   if (Array.isArray(eth.providers) && eth.providers.length) {
-    return eth.providers.some((p) =>
-      kind === "metamask" ? p.isMetaMask === true : p.isCoinbaseWallet === true,
-    );
+    return eth.providers.some((p) => {
+      switch (kind) {
+        case "metamask":
+          return p.isMetaMask === true && p.isCoinbaseWallet !== true && p.isTrust !== true;
+        case "coinbase":
+          return p.isCoinbaseWallet === true;
+        case "trust":
+          return p.isTrust === true || p.isTrustWallet === true;
+        default:
+          return false;
+      }
+    });
   }
-  return kind === "metamask" ? !!eth.isMetaMask : !!eth.isCoinbaseWallet;
+  if (kind === "metamask") {
+    return !!eth.isMetaMask && !eth.isTrust && !eth.isTrustWallet && !eth.isCoinbaseWallet;
+  }
+  if (kind === "coinbase") return !!eth.isCoinbaseWallet;
+  if (kind === "trust") return !!eth.isTrust || !!eth.isTrustWallet;
+  return false;
 }
 
 function shortenAddress(addr: string | null): string | null {
@@ -98,20 +215,30 @@ function shortenAddress(addr: string | null): string | null {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
 }
 
+const EMPTY_INSTALLED: Record<WalletKind, boolean> = {
+  metamask: false,
+  coinbase: false,
+  trust: false,
+  binance: false,
+};
+
+function readInstalled(): Record<WalletKind, boolean> {
+  if (typeof window === "undefined") return EMPTY_INSTALLED;
+  return {
+    metamask: isWalletInstalled("metamask"),
+    coinbase: isWalletInstalled("coinbase"),
+    trust: isWalletInstalled("trust"),
+    binance: isWalletInstalled("binance"),
+  };
+}
+
 export function useWallet() {
   const [state, setState] = useState<WalletState>(INITIAL);
-  const [installed, setInstalled] = useState<Record<WalletKind, boolean>>({
-    metamask: false,
-    coinbase: false,
-  });
+  const [installed, setInstalled] = useState<Record<WalletKind, boolean>>(EMPTY_INSTALLED);
 
   // Detect installed wallets on mount
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    setInstalled({
-      metamask: isWalletInstalled("metamask"),
-      coinbase: isWalletInstalled("coinbase"),
-    });
+    setInstalled(readInstalled());
   }, []);
 
   // Re-check installation whenever window.ethereum appears (extension late-injection)
@@ -119,12 +246,16 @@ export function useWallet() {
     if (typeof window === "undefined") return;
     let cancelled = false;
     const interval = window.setInterval(() => {
-      const next = {
-        metamask: isWalletInstalled("metamask"),
-        coinbase: isWalletInstalled("coinbase"),
-      };
+      const next = readInstalled();
       setInstalled((prev) => {
-        if (prev.metamask === next.metamask && prev.coinbase === next.coinbase) return prev;
+        if (
+          prev.metamask === next.metamask &&
+          prev.coinbase === next.coinbase &&
+          prev.trust === next.trust &&
+          prev.binance === next.binance
+        ) {
+          return prev;
+        }
         return next;
       });
       if (cancelled) window.clearInterval(interval);
@@ -140,13 +271,15 @@ export function useWallet() {
     try {
       const provider = pickProvider(kind);
       if (!provider) {
-        const which = kind === "metamask" ? "MetaMask" : "Coinbase Wallet";
-        throw new Error(`${which} not detected. Please install the extension and refresh.`);
+        const meta = WALLET_META[kind];
+        throw new Error(
+          `${meta.name} no detectado. Instala la extensión y recarga la página.`,
+        );
       }
 
       const accounts = (await provider.request({ method: "eth_requestAccounts" })) as string[];
       if (!accounts || !accounts.length) {
-        throw new Error("No account returned by wallet.");
+        throw new Error("La wallet no devolvió ninguna cuenta.");
       }
       const chainIdHex = (await provider.request({ method: "eth_chainId" })) as string;
       const chainId = chainIdHex ? parseInt(chainIdHex, 16) : null;
@@ -172,12 +305,12 @@ export function useWallet() {
       const err = e as { code?: number; message?: string };
       // 4001 = user rejected request
       if (err?.code === 4001) {
-        setState((s) => ({ ...s, isConnecting: false, error: "Connection request rejected." }));
+        setState((s) => ({ ...s, isConnecting: false, error: "Solicitud de conexión rechazada." }));
       } else {
         setState((s) => ({
           ...s,
           isConnecting: false,
-          error: err?.message ?? "Failed to connect wallet.",
+          error: err?.message ?? "Error al conectar la wallet.",
         }));
       }
     }
