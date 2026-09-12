@@ -126,3 +126,50 @@ bun run db:push      # apply Prisma schema (optional)
 ## License
 
 MIT
+
+## Deployment
+
+The repo ships with two GitHub Actions workflows in `.github/workflows/`:
+
+- **`ci.yml`** — Runs on every push and PR to `main`. Executes `bun run lint` then `bun run build`. Uploads the standalone build as an artifact.
+- **`deploy.yml`** — Runs on push to `main` (after CI passes). Builds and deploys to Vercel production via `amondnet/vercel-action@v25`.
+
+### Required GitHub secrets
+
+Add these in **Settings → Secrets and variables → Actions → New repository secret**:
+
+| Secret | Where to get it |
+|---|---|
+| `VERCEL_TOKEN` | https://vercel.com/account/tokens → "Create token" (scope: full account) |
+| `VERCEL_ORG_ID` | `vercel.json` or Settings → General → "Vercel ID" on https://vercel.com/dashboard |
+| `VERCEL_PROJECT_ID` | Project Settings → General → "Project ID" |
+| `NEXT_PUBLIC_WC_PROJECT_ID` | (Optional) https://cloud.walletconnect.com → "Create project" — enables real WalletConnect pairing |
+| `DATABASE_URL` | (Optional) PostgreSQL URL if you switch from localStorage to a real DB |
+
+### First-time setup
+
+1. **Fork/clone** the repo to your GitHub account
+2. **Create a Vercel project**: https://vercel.com/new → Import Git Repository → select your fork
+3. **Configure Framework Preset**: Next.js (auto-detected)
+4. **Copy the IDs**: from Project Settings → General, copy `Project ID` and your `Team ID` (Org ID)
+5. **Create a Vercel token**: https://vercel.com/account/tokens
+6. **Add GitHub secrets** (Settings → Secrets and variables → Actions)
+7. **Push to main** — the workflow will deploy automatically
+
+### Manual deploy
+
+Run the workflow manually from the **Actions tab** → "Deploy to Vercel" → "Run workflow".
+
+### Vercel configuration
+
+`vercel.json` is included with sensible defaults (Next.js framework, security headers, image caching). Override at will.
+
+### Monitoring
+
+- Workflow runs: https://github.com/QFS-official/QFS-DEX/actions
+- Vercel deployments: https://vercel.com/dashboard
+- Vercel logs: Project → Logs (Realtime / Build / Runtime)
+
+### Alternative: Vercel Git integration
+
+If you prefer not to use GitHub Actions, install the official Vercel GitHub app (https://vercel.com/docs/deployments/git) — Vercel will auto-deploy on every push without needing Actions. Note that you'd lose the CI lint/build check though.
