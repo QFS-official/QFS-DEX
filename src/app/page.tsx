@@ -5,6 +5,7 @@ import { ShieldCheck } from "lucide-react";
 import { PortalFooter, PortalHeader } from "@/components/portal/portal-header";
 import { BridgeCard } from "@/components/portal/bridge-card";
 import { SwapCard } from "@/components/portal/swap-card";
+import { AirdropCard } from "@/components/portal/airdrop-card";
 import { MarketingPanel } from "@/components/portal/marketing-panel";
 import { ModeTabs, type BridgeMode } from "@/components/portal/mode-tabs";
 import { PriceChart } from "@/components/portal/price-chart";
@@ -80,18 +81,23 @@ export default function Home() {
 
       <main className="flex flex-1 items-start justify-center px-4 pt-6 sm:items-center sm:pt-8">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-stretch gap-6 lg:flex-row lg:items-start">
-          {/* ─── Left column: favorites + swap card ─── */}
-          <div className="flex flex-1 flex-col gap-3 lg:flex-none lg:w-[460px]">
+          {/* ─── Left column: favorites + swap/bridge/airdrop card ─── */}
+          <div className={
+            "flex flex-1 flex-col gap-3 lg:flex-none " +
+            (mode === "airdrop" ? "lg:w-[640px]" : "lg:w-[460px]")
+          }>
             <div className="text-center">
               <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                 {mode === "swap" && t("subtitle.swap")}
                 {mode === "dca" && t("subtitle.dca")}
                 {mode === "bridge" && t("subtitle.bridge")}
+                {mode === "airdrop" && t("subtitle.airdrop")}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 {mode === "swap" && t("subtitle.swap.desc")}
                 {mode === "dca" && t("subtitle.dca.desc")}
                 {mode === "bridge" && t("subtitle.bridge.desc")}
+                {mode === "airdrop" && t("subtitle.airdrop.desc")}
                 {selectedChain.evmChainId === wallet.chainId && wallet.address
                   ? " " + t("subtitle.connected", { chain: selectedChain.name })
                   : ""}
@@ -127,6 +133,7 @@ export default function Home() {
               />
             )}
             {mode === "bridge" && <BridgeCard wallet={wallet} />}
+            {mode === "airdrop" && <AirdropCard wallet={wallet} />}
             {mode === "dca" && <ComingSoonCard label={t("dca.comingSoon")} desc={t("dca.comingSoon.desc")} />}
 
             {/* Helper note for Solana */}
@@ -157,6 +164,7 @@ export default function Home() {
             </div>
           )}
           {mode === "bridge" && <BridgeMarketingPanel />}
+          {mode === "airdrop" && <AirdropMarketingPanel />}
           {mode === "dca" && <div className="hidden lg:block lg:w-[440px]" />}
         </div>
       </main>
@@ -280,6 +288,91 @@ function Stat({ value, label }: { value: string; label: string }) {
     <div>
       <div className="text-xl font-semibold text-foreground">{value}</div>
       <div className="text-[11px] text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
+/**
+ * Marketing panel variant for the Airdrop mode — emphasizes mass-distribution
+ * features and supported chains.
+ */
+function AirdropMarketingPanel() {
+  const { t } = useLanguage();
+  return (
+    <div className="hidden w-full flex-col justify-between rounded-3xl border border-white/8 bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-8 lg:flex">
+      <div
+        className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full opacity-40 blur-3xl"
+        style={{
+          background: "radial-gradient(circle, rgba(240, 185, 11, 0.4), transparent 70%)",
+        }}
+      />
+      <div className="relative">
+        <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-[#8b7cf6]/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#b8a8ff] ring-1 ring-[#8b7cf6]/30">
+          {t("marketing.airdrop.badge")}
+        </div>
+        <h3 className="text-3xl font-semibold leading-tight tracking-tight text-foreground">
+          {t("marketing.airdrop.title")}{" "}
+          <span className="text-[#8b7cf6]">{t("marketing.airdrop.title.highlight")}</span>
+        </h3>
+        <p className="mt-3 max-w-md text-sm text-muted-foreground">
+          {t("marketing.airdrop.desc")}
+        </p>
+      </div>
+
+      {/* Supported chains grid */}
+      <div className="relative mt-8 grid grid-cols-2 gap-3">
+        {Object.values(CHAINS).map((c) => (
+          <div
+            key={c.id}
+            className="flex items-center gap-2.5 rounded-2xl border border-white/6 bg-white/[0.02] p-3 transition-colors hover:border-white/12 hover:bg-white/[0.05]"
+          >
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white"
+              style={{
+                background: `linear-gradient(135deg, ${c.gradient[0]}, ${c.gradient[1]})`,
+              }}
+            >
+              {c.glyph}
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-foreground">{c.name}</div>
+              <div className="text-[11px] text-muted-foreground">{c.shortName}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Features list */}
+      <div className="relative mt-8">
+        <div className="mb-3 text-[10px] uppercase tracking-widest text-muted-foreground">
+          {t("marketing.airdrop.features")}
+        </div>
+        <ul className="flex flex-col gap-2">
+          {[
+            "marketing.airdrop.feature.csv",
+            "marketing.airdrop.feature.multichain",
+            "marketing.airdrop.feature.batch",
+            "marketing.airdrop.feature.estimate",
+          ].map((key) => (
+            <li
+              key={key}
+              className="flex items-start gap-2 text-xs text-muted-foreground"
+            >
+              <span
+                className="mt-0.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[#8b7cf6]"
+                aria-hidden="true"
+              />
+              <span>{t(key)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Stats */}
+      <div className="relative mt-8 grid grid-cols-2 gap-4 border-t border-white/6 pt-6">
+        <Stat value="2,847" label={t("marketing.airdrop.volume")} />
+        <Stat value="184k" label={t("marketing.airdrop.wallets")} />
+      </div>
     </div>
   );
 }

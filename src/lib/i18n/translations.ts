@@ -28,6 +28,7 @@ const es: Dict = {
   "mode.swap": "Swap",
   "mode.dca": "DCA",
   "mode.bridge": "Bridge",
+  "mode.airdrop": "Airdrop",
 
   // ─── Subtitles (per mode) ─────────────────────────────────────────────
   "subtitle.swap": "Swap entre tokens",
@@ -36,6 +37,8 @@ const es: Dict = {
   "subtitle.dca.desc": "Configura compras recurrentes automáticas.",
   "subtitle.bridge": "Bridge cross-chain",
   "subtitle.bridge.desc": "Transfiere activos entre BNB, Polygon, Solana y Ethereum.",
+  "subtitle.airdrop": "Airdrop masivo de tokens",
+  "subtitle.airdrop.desc": "Distribuye tokens a múltiples destinatarios en una sola transacción.",
   "subtitle.connected": "Conectado a {chain}.",
 
   // ─── Swap card ─────────────────────────────────────────────────────────
@@ -210,6 +213,51 @@ const es: Dict = {
   "dca.comingSoon.desc":
     "Estamos trabajando en esta función. Mientras tanto, usa Swap para operar en la misma red o Bridge para mover activos entre cadenas.",
 
+  // ─── Airdrop card ──────────────────────────────────────────────────────
+  "airdrop.title": "Airdrop",
+  "airdrop.network": "Red",
+  "airdrop.token": "Token",
+  "airdrop.amountPerRecipient": "Cantidad por destinatario",
+  "airdrop.recipients": "Destinatarios",
+  "airdrop.recipients.placeholder": "Pega las direcciones separadas por coma o una por línea…",
+  "airdrop.recipients.valid": "{count} direcciones válidas",
+  "airdrop.recipients.invalid": "{count} inválidas omitidas",
+  "airdrop.recipients.empty": "Ingresa al menos una dirección",
+  "airdrop.pasteCA": "Pegar desde portapapeles",
+  "airdrop.clear": "Limpiar",
+  "airdrop.total.recipients": "Destinatarios",
+  "airdrop.total.amount": "Total a enviar",
+  "airdrop.total.gas": "Gas estimado",
+  "airdrop.total.networkFee": "Fee de red",
+  "airdrop.cta.noRecipients": "Ingresa al menos una dirección",
+  "airdrop.cta.enterAmount": "Ingresa el monto por destinatario",
+  "airdrop.cta.solana": "Solana requiere Phantom Wallet",
+  "airdrop.cta.connect": "Conectar billetera",
+  "airdrop.cta.switchChain": "Cambiar a {chain}",
+  "airdrop.cta.send": "Enviar Airdrop",
+  "airdrop.cta.processing": "Procesando…",
+  "airdrop.sent": "Airdrop enviado a {count} destinatarios",
+  "airdrop.distribution": "Distribución",
+  "airdrop.distribution.perRecipient": "por destinatario",
+  "airdrop.distribution.to": "a",
+  "airdrop.distribution.recipients": "destinatarios",
+  "airdrop.warning.solana":
+    "Solana no es accesible desde MetaMask o Coinbase Wallet. Instala Phantom Wallet para airdrops en Solana.",
+
+  // ─── Marketing panel (Airdrop mode) ───────────────────────────────────
+  "marketing.airdrop.badge": "QFS Airdrop",
+  "marketing.airdrop.title": "Distribuye a",
+  "marketing.airdrop.title.highlight": "miles de wallets",
+  "marketing.airdrop.desc":
+    "Envía tokens a múltiples destinatarios en una sola transacción on-chain. Soporta Ethereum, BNB Chain, Polygon y Solana. Cómputo local de destinatarios válidos y estimación de gas antes del envío.",
+  "marketing.airdrop.features": "Características",
+  "marketing.airdrop.feature.csv": "Importa direcciones por CSV o texto pegado",
+  "marketing.airdrop.feature.multichain": "Soporta ETH, BNB, Polygon y Solana",
+  "marketing.airdrop.feature.batch": "Hasta 500 destinatarios por transacción",
+  "marketing.airdrop.feature.estimate": "Estimación de gas en vivo",
+  "marketing.airdrop.volume": "Airdrops enviados",
+  "marketing.airdrop.wallets": "Wallets alcanzadas",
+
   // ─── Bridge card (Portal-style) ──────────────────────────────────────
   "bridge.from": "From",
   "bridge.to": "To",
@@ -237,6 +285,7 @@ const en: Dict = {
   "mode.swap": "Swap",
   "mode.dca": "DCA",
   "mode.bridge": "Bridge",
+  "mode.airdrop": "Airdrop",
 
   // ─── Subtitles ────────────────────────────────────────────────────────
   "subtitle.swap": "Swap between tokens",
@@ -245,6 +294,8 @@ const en: Dict = {
   "subtitle.dca.desc": "Set up automatic recurring buys.",
   "subtitle.bridge": "Cross-chain bridge",
   "subtitle.bridge.desc": "Move assets across BNB, Polygon, Solana, and Ethereum.",
+  "subtitle.airdrop": "Mass token airdrop",
+  "subtitle.airdrop.desc": "Distribute tokens to multiple recipients in a single on-chain transaction.",
   "subtitle.connected": "Connected to {chain}.",
 
   // ─── Swap card ─────────────────────────────────────────────────────────
@@ -418,6 +469,51 @@ const en: Dict = {
   "dca.comingSoon": "DCA — coming soon",
   "dca.comingSoon.desc":
     "We're working on this feature. Meanwhile, use Swap to trade on the same network or Bridge to move assets across chains.",
+
+  // ─── Airdrop card ──────────────────────────────────────────────────────
+  "airdrop.title": "Airdrop",
+  "airdrop.network": "Network",
+  "airdrop.token": "Token",
+  "airdrop.amountPerRecipient": "Amount per recipient",
+  "airdrop.recipients": "Recipients",
+  "airdrop.recipients.placeholder": "Paste addresses separated by comma or one per line…",
+  "airdrop.recipients.valid": "{count} valid addresses",
+  "airdrop.recipients.invalid": "{count} invalid skipped",
+  "airdrop.recipients.empty": "Enter at least one address",
+  "airdrop.pasteCA": "Paste from clipboard",
+  "airdrop.clear": "Clear",
+  "airdrop.total.recipients": "Recipients",
+  "airdrop.total.amount": "Total to send",
+  "airdrop.total.gas": "Estimated gas",
+  "airdrop.total.networkFee": "Network fee",
+  "airdrop.cta.noRecipients": "Enter at least one address",
+  "airdrop.cta.enterAmount": "Enter the amount per recipient",
+  "airdrop.cta.solana": "Solana requires Phantom Wallet",
+  "airdrop.cta.connect": "Connect wallet",
+  "airdrop.cta.switchChain": "Switch to {chain}",
+  "airdrop.cta.send": "Send Airdrop",
+  "airdrop.cta.processing": "Processing…",
+  "airdrop.sent": "Airdrop sent to {count} recipients",
+  "airdrop.distribution": "Distribution",
+  "airdrop.distribution.perRecipient": "per recipient",
+  "airdrop.distribution.to": "to",
+  "airdrop.distribution.recipients": "recipients",
+  "airdrop.warning.solana":
+    "Solana is not reachable from MetaMask or Coinbase Wallet. Install Phantom Wallet for Solana airdrops.",
+
+  // ─── Marketing panel (Airdrop mode) ───────────────────────────────────
+  "marketing.airdrop.badge": "QFS Airdrop",
+  "marketing.airdrop.title": "Distribute to",
+  "marketing.airdrop.title.highlight": "thousands of wallets",
+  "marketing.airdrop.desc":
+    "Send tokens to multiple recipients in a single on-chain transaction. Supports Ethereum, BNB Chain, Polygon, and Solana. Local validation of recipients and live gas estimation before sending.",
+  "marketing.airdrop.features": "Features",
+  "marketing.airdrop.feature.csv": "Import addresses via CSV or pasted text",
+  "marketing.airdrop.feature.multichain": "Supports ETH, BNB, Polygon, and Solana",
+  "marketing.airdrop.feature.batch": "Up to 500 recipients per transaction",
+  "marketing.airdrop.feature.estimate": "Live gas estimation",
+  "marketing.airdrop.volume": "Airdrops sent",
+  "marketing.airdrop.wallets": "Wallets reached",
 
   // ─── Bridge card ──────────────────────────────────────────────────────
   "bridge.from": "From",
