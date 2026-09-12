@@ -101,6 +101,10 @@ export interface BridgeToken {
   addressByChain: Partial<Record<ChainId, string>>;
   /** Approximate USD price used for the UI's amount preview */
   usdPrice: number;
+  /** 24h price change as a percentage (e.g. -0.54 = -0.54%) — used in the token picker */
+  change24h?: number;
+  /** Whether the contract is verified/audited — shows a checkmark badge in the picker */
+  verified?: boolean;
   /** Icon emoji fallback used when no token logo is available */
   emoji: string;
   /** Optional gradient for the placeholder logo */
@@ -119,6 +123,8 @@ export const BRIDGE_TOKENS: BridgeToken[] = [
       solana: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     },
     usdPrice: 1.0,
+    change24h: 0.08,
+    verified: true,
     emoji: "💵",
     gradient: ["#2775CA", "#3B82F6"],
     decimals: 6,
@@ -133,6 +139,8 @@ export const BRIDGE_TOKENS: BridgeToken[] = [
       solana: "Es9vMFrzaCERmJfrF4H2FY5NMAfjH3E2SkoH2EF5pdrT",
     },
     usdPrice: 1.0,
+    change24h: 0.05,
+    verified: true,
     emoji: "💵",
     gradient: ["#26A17B", "#1FA171"],
     decimals: 6,
@@ -146,6 +154,8 @@ export const BRIDGE_TOKENS: BridgeToken[] = [
       eth: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     },
     usdPrice: 2350.0,
+    change24h: -0.54,
+    verified: true,
     emoji: "💎",
     gradient: ["#627EEA", "#4255A6"],
     decimals: 18,
@@ -160,6 +170,8 @@ export const BRIDGE_TOKENS: BridgeToken[] = [
       solana: "worm3DTm7BkJv5k7vU3yB8D5c8b9k2V9M1cJ4D5f",
     },
     usdPrice: 0.42,
+    change24h: 3.21,
+    verified: true,
     emoji: "🐛",
     gradient: ["#8b7cf6", "#5d4bcc"],
     decimals: 18,
@@ -172,6 +184,8 @@ export const NATIVE_BY_CHAIN: Record<ChainId, BridgeToken> = {
     name: "BNB",
     addressByChain: { bnb: "native" },
     usdPrice: 580.0,
+    change24h: -1.32,
+    verified: true,
     emoji: "🟡",
     gradient: ["#F0B90B", "#F8D12F"],
     decimals: 18,
@@ -181,6 +195,8 @@ export const NATIVE_BY_CHAIN: Record<ChainId, BridgeToken> = {
     name: "POL",
     addressByChain: { polygon: "native" },
     usdPrice: 0.42,
+    change24h: 0.94,
+    verified: true,
     emoji: "🟣",
     gradient: ["#8247E5", "#A36AE5"],
     decimals: 18,
@@ -190,6 +206,8 @@ export const NATIVE_BY_CHAIN: Record<ChainId, BridgeToken> = {
     name: "Ether",
     addressByChain: { eth: "native" },
     usdPrice: 2350.0,
+    change24h: -0.54,
+    verified: true,
     emoji: "Ξ",
     gradient: ["#627EEA", "#8A92B2"],
     decimals: 18,
@@ -199,6 +217,8 @@ export const NATIVE_BY_CHAIN: Record<ChainId, BridgeToken> = {
     name: "Solana",
     addressByChain: { solana: "native" },
     usdPrice: 145.0,
+    change24h: 2.41,
+    verified: true,
     emoji: "🟢",
     gradient: ["#14F195", "#9945FF"],
     decimals: 9,

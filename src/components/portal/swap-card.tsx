@@ -27,6 +27,7 @@ import { useWallet, WALLETS, type WalletKind } from "@/hooks/use-wallet";
 import { NetworkSelector } from "./network-selector";
 import { TokenSelector } from "./token-selector";
 import { WalletConnectModal } from "./wallet-connect-modal";
+import { TokenPickerModal } from "./token-picker-modal";
 import { useToast } from "@/hooks/use-toast";
 import { useFavorites } from "@/lib/swap/favorites";
 import { addSwapRecord } from "@/lib/swap/history";
@@ -88,6 +89,7 @@ export function SwapCard({
   const [showSettings, setShowSettings] = useState(false);
   const [slippage, setSlippage] = useState(DEFAULT_SLIPPAGE);
   const [modalOpen, setModalOpen] = useState(false);
+  const [pickerSide, setPickerSide] = useState<"de" | "a" | null>(null);
   const [swapping, setSwapping] = useState(false);
   const [swappedTx, setSwappedTx] = useState<string | null>(null);
   const { toast } = useToast();
@@ -368,8 +370,7 @@ export function SwapCard({
             <div className="flex items-center gap-3">
               <TokenSelectorLarge
                 value={deToken}
-                options={tokens}
-                onChange={(t) => onDeSymbolChange(t.symbol)}
+                onOpenPicker={() => setPickerSide("de")}
               />
               <input
                 inputMode="decimal"
@@ -428,8 +429,7 @@ export function SwapCard({
             <div className="flex items-center gap-3">
               <TokenSelectorLarge
                 value={aToken}
-                options={tokens}
-                onChange={(t) => onASymbolChange(t.symbol)}
+                onOpenPicker={() => setPickerSide("a")}
               />
               <input
                 type="text"
@@ -524,6 +524,22 @@ export function SwapCard({
         onOpenChange={setModalOpen}
         wallet={wallet}
       />
+
+      <TokenPickerModal
+        open={pickerSide !== null}
+        onClose={() => setPickerSide(null)}
+        tokens={tokens}
+        currentChain={chain}
+        side={pickerSide ?? "de"}
+        currentSymbol={pickerSide === "de" ? deSymbol : pickerSide === "a" ? aSymbol : null}
+        onSelect={(t) => {
+          if (pickerSide === "de") onDeSymbolChange(t.symbol);
+          else if (pickerSide === "a") onASymbolChange(t.symbol);
+        }}
+        onChainChange={(c) => {
+          onChainChange(c);
+        }}
+      />
     </div>
   );
 }
@@ -558,36 +574,31 @@ function UtilityButton({
 
 function TokenSelectorLarge({
   value,
-  options,
-  onChange,
+  onOpenPicker,
 }: {
   value: BridgeToken | null;
-  options: BridgeToken[];
-  onChange: (token: BridgeToken) => void;
+  onOpenPicker: () => void;
 }) {
   return (
-    <DropdownLarge
-      trigger={
-        <button className="flex items-center gap-2 rounded-full p-1 pr-2.5 transition-colors hover:bg-white/5">
-          {value ? (
-            <LargeTokenGlyph token={value} />
-          ) : (
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-sm text-muted-foreground">
-              ?
-            </div>
-          )}
-          <div className="min-w-0 text-left">
-            <div className="text-base font-semibold leading-tight text-white">
-              {value?.symbol ?? "Select"}
-            </div>
-          </div>
-          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-        </button>
-      }
-      options={options}
-      value={value}
-      onChange={onChange}
-    />
+    <button
+      onClick={onOpenPicker}
+      className="flex items-center gap-2 rounded-full p-1 pr-2.5 transition-colors hover:bg-white/5"
+      aria-label="Seleccionar token"
+    >
+      {value ? (
+        <LargeTokenGlyph token={value} />
+      ) : (
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-sm text-muted-foreground">
+          ?
+        </div>
+      )}
+      <div className="min-w-0 text-left">
+        <div className="text-base font-semibold leading-tight text-white">
+          {value?.symbol ?? "Select"}
+        </div>
+      </div>
+      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+    </button>
   );
 }
 
@@ -604,66 +615,6 @@ function LargeTokenGlyph({ token }: { token: BridgeToken }) {
         {token.symbol.slice(0, 3)}
       </div>
     </div>
-  );
-}
-
-/**
- * Thin wrapper around the standard DropdownMenu to keep the OKX-style trigger
- * layout (large logo + symbol + chevron) inside the swap card.
- */
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Check } from "lucide-react";
-
-function DropdownLarge({
-  trigger,
-  options,
-  value,
-  onChange,
-}: {
-  trigger: React.ReactNode;
-  options: BridgeToken[];
-  value: BridgeToken | null;
-  onChange: (token: BridgeToken) => void;
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        className="min-w-[240px] rounded-xl border-white/10 bg-[#1a1832] p-1 text-white"
-      >
-        <div className="px-2 py-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
-          Selecciona un token
-        </div>
-        {options.map((t) => {
-          const selected = !!value && value.symbol === t.symbol;
-          return (
-            <DropdownMenuItem
-              key={t.symbol}
-              onSelect={(e) => {
-                e.preventDefault();
-                onChange(t);
-              }}
-              className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-sm focus:bg-white/5"
-            >
-              <LargeTokenGlyph token={t} />
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-semibold">{t.symbol}</div>
-                <div className="text-[11px] text-muted-foreground">
-                  {t.name} · ≈ ${t.usdPrice.toFixed(2)}
-                </div>
-              </div>
-              {selected && <Check className="h-4 w-4 text-[#8b7cf6]" />}
-            </DropdownMenuItem>
-          );
-        })}
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 }
 
