@@ -87,7 +87,7 @@ export default function Home() {
                 {mode === "bridge" && "Bridge cross-chain"}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                {mode === "swap" && "Mejor precio vía Portal Routing en 400+ DEXs y 30+ redes."}
+                {mode === "swap" && "Mejor precio vía QFS Routing en 400+ DEXs y 30+ redes."}
                 {mode === "dca" && "Configura compras recurrentes automáticas."}
                 {mode === "bridge" && "Transfiere activos entre BNB, Polygon, Solana y Ethereum."}
                 {selectedChain.evmChainId === wallet.chainId && wallet.address
@@ -224,13 +224,13 @@ function BridgeMarketingPanel() {
       />
       <div className="relative">
         <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-[#8b7cf6]/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#b8a8ff] ring-1 ring-[#8b7cf6]/30">
-          Portal Bridge
+          QFS Swap Bridge
         </div>
         <h3 className="text-3xl font-semibold leading-tight tracking-tight text-white">
           Mueve activos <span className="text-[#8b7cf6]">entre redes</span>
         </h3>
         <p className="mt-3 max-w-md text-sm text-muted-foreground">
-          Portal Bridge transfiere tokens nativos y wrapped entre BNB Chain,
+          QFS Swap transfiere tokens nativos y wrapped entre BNB Chain,
           Polygon, Solana y Ethereum usando el protocolo Wormhole.
           Sin custodia, con hasta 5 confirmaciones de seguridad.
         </p>

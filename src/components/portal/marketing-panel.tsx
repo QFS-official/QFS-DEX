@@ -33,14 +33,14 @@ export function MarketingPanel() {
       <div className="relative">
         <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-[#8b7cf6]/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-[#b8a8ff] ring-1 ring-[#8b7cf6]/30">
           <Sparkles className="h-3 w-3" />
-          Portal Routing
+          QFS Routing
         </div>
         <h3 className="text-3xl font-semibold leading-tight tracking-tight text-white">
           Swapea con el <span className="text-[#8b7cf6]">mejor precio</span>
         </h3>
         <p className="mt-3 max-w-md text-sm text-muted-foreground">
           Elige libremente entre las rutas de los principales agregadores DEX.
-          Portal Routing busca las mejores cotizaciones en más de 400 DEXs y
+          QFS Routing busca las mejores cotizaciones en más de 400 DEXs y
           30 redes, con protección MEV y ejecución óptima.
         </p>
       </div>

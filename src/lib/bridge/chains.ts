@@ -1,5 +1,5 @@
 /**
- * Chain configurations for the Portal-style bridge.
+ * Chain configurations for the QFS Swap bridge.
  * Covers BNB Chain (BSC), Polygon, Solana, and Ethereum mainnet.
  */
 

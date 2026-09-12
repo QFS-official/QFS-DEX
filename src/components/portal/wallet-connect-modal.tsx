@@ -142,7 +142,7 @@ export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
             <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#8b7cf6]" />
             <p>
               Al conectar, aceptas los Términos de Servicio. Tu wallet mantiene
-              el control de tus claves — Portal Bridge nunca custodia tus fondos.
+              el control de tus claves — QFS Swap nunca custodia tus fondos.
             </p>
           </div>
 

@@ -65,7 +65,7 @@ export interface SwapCardProps {
 /**
  * OKX-style same-chain swap card.
  *
- * Visual differences from the Portal-style BridgeCard:
+ * Visual differences from the QFS Swap BridgeCard:
  *  - "De" / "A" labels (Spanish) instead of "From" / "To"
  *  - Single network selector at the top (applies to both sides — same-chain swap)
  *  - Large token logos (~44px) instead of compact 28px pills

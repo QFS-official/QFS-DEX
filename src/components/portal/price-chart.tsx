@@ -75,7 +75,7 @@ export function PriceChart({ fromSymbol, toSymbol, currentPrice, chainKey }: Pro
               {fromSymbol}/{toSymbol}
             </span>
             <span className="rounded-md bg-white/5 px-1.5 py-0.5 text-[10px] uppercase tracking-widest text-muted-foreground ring-1 ring-white/8">
-              Portal
+              QFS
             </span>
           </div>
           <div className="mt-1 flex items-baseline gap-2">

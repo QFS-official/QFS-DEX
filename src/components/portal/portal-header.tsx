@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowLeftRight, ExternalLink, Loader2, ShieldCheck } from "lucide-react";
+import { ExternalLink, Loader2, ShieldCheck } from "lucide-react";
+import Image from "next/image";
 import { useWallet, WALLETS } from "@/hooks/use-wallet";
 import { CHAINS } from "@/lib/bridge/chains";
 
@@ -15,17 +16,19 @@ export function PortalHeader({ wallet, onOpenWallet }: HeaderProps) {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
         {/* Brand */}
         <div className="flex items-center gap-2.5">
-          <div className="relative h-8 w-8">
-            <div
-              className="absolute inset-0 rounded-lg"
-              style={{
-                background: "linear-gradient(135deg, #9d8df9 0%, #7c6cf0 100%)",
-                boxShadow: "0 6px 20px rgba(139, 124, 246, 0.5)",
-              }}
+          <div className="relative h-9 w-9 overflow-hidden rounded-lg ring-1 ring-white/10">
+            <Image
+              src="/qfs-logo.png"
+              alt="QFS Swap logo"
+              width={36}
+              height={36}
+              priority
+              className="h-full w-full object-cover"
             />
-            <ArrowLeftRight className="absolute inset-0 m-auto h-4 w-4 text-white" />
           </div>
-          <span className="text-xl font-semibold tracking-tight text-white">PORTAL</span>
+          <span className="text-xl font-semibold tracking-tight text-white">
+            QFS <span className="text-[#8b7cf6]">Swap</span>
+          </span>
           <span className="hidden rounded-full bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-widest text-muted-foreground ring-1 ring-white/10 sm:inline">
             Bridge
           </span>
@@ -105,7 +108,7 @@ function WalletPill({
 }
 
 /**
- * Footer showing the supported chains and a small disclaimer — Portal-style.
+ * Footer showing the supported chains and a small disclaimer — QFS Swap style.
  */
 export function PortalFooter() {
   return (
@@ -115,7 +118,7 @@ export function PortalFooter() {
         <div className="flex flex-col gap-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-3.5 w-3.5 text-[#8b7cf6]" />
-            <span>Powered by the Wormhole cross-chain protocol</span>
+            <span>Powered by QFS Swap — Wormhole cross-chain protocol</span>
           </div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span className="uppercase tracking-widest">Supported networks</span>
