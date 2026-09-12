@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2,
+  Clock,
   Copy,
   ExternalLink,
   Info,
   Loader2,
   RefreshCw,
+  Star,
+  Trash2,
   X,
 } from "lucide-react";
 import {
@@ -19,12 +22,23 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { useWallet } from "@/hooks/use-wallet";
+import {
+  MOBILE_WALLETS,
+  useMobileWalletRecents,
+  type MobileWallet,
+} from "@/lib/wallets/mobile-recents";
 
 interface Props {
   open: boolean;
@@ -33,13 +47,6 @@ interface Props {
   onSimulateScan: () => void;
   wallet: ReturnType<typeof useWallet>;
 }
-
-const MOBILE_WALLETS = [
-  { name: "Trust Wallet", url: "https://apps.apple.com/app/id1288339409" },
-  { name: "MetaMask", url: "https://metamask.io/download/" },
-  { name: "Rainbow", url: "https://rainbow.me/" },
-  { name: "Coinbase Wallet", url: "https://www.coinbase.com/wallet/downloads" },
-];
 
 export function WalletConnectQRModal({
   open,
@@ -93,11 +100,12 @@ export function WalletConnectQRModal({
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
       <DialogContent
-        className="portal-card overflow-hidden p-0 sm:max-w-md"
+        className="portal-card max-h-[90vh] overflow-hidden p-0 sm:max-w-md"
         showCloseButton={false}
       >
+        <div className="flex max-h-[90vh] flex-col">
         {/* Header */}
-        <div className="relative flex items-center justify-between border-b border-white/5 px-5 py-4">
+        <div className="relative flex shrink-0 items-center justify-between border-b border-white/5 px-5 py-4">
           <div className="flex items-center gap-2.5">
             {/* WC logo */}
             <div
@@ -127,8 +135,8 @@ export function WalletConnectQRModal({
           </button>
         </div>
 
-        {/* QR area */}
-        <div className="flex flex-col items-center gap-4 px-5 py-6">
+        {/* QR area — scrollable when content exceeds viewport */}
+        <div className="portal-scroll-hidden flex flex-1 flex-col items-center gap-4 overflow-y-auto px-5 py-5">
           {uri ? (
             <div className="relative rounded-2xl bg-white p-4 ring-1 ring-white/10">
               <QRCodeSVG
@@ -222,25 +230,9 @@ export function WalletConnectQRModal({
             </p>
           </div>
 
-          {/* Mobile wallet suggestions */}
+          {/* Mobile wallet suggestions with Populares / Recientes tabs */}
           <div className="w-full">
-            <div className="mb-2 text-center text-[10px] uppercase tracking-widest text-muted-foreground">
-              No tienes wallet? Descarga una
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {MOBILE_WALLETS.map((w) => (
-                <a
-                  key={w.name}
-                  href={w.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg border border-white/8 bg-white/[0.02] px-3 py-2 text-[11px] text-white/80 transition-colors hover:border-[#8b7cf6]/40 hover:bg-white/[0.05]"
-                >
-                  <span>{w.name}</span>
-                  <ExternalLink className="h-2.5 w-2.5 text-muted-foreground" />
-                </a>
-              ))}
-            </div>
+            <MobileWalletsTabs uri={uri} />
           </div>
 
           {/* Reload / refresh */}
@@ -258,7 +250,199 @@ export function WalletConnectQRModal({
             Cancelar y elegir otra wallet
           </button>
         </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
+}
+
+/**
+ * "Populares / Recientes" tabbed grid of mobile wallets.
+ * The Populares tab shows the full catalog (8 wallets).
+ * The Recientes tab shows the user's recently-clicked wallets (max 6),
+ * persisted to localStorage. Clicking a wallet link records it as recent.
+ */
+function MobileWalletsTabs({ uri }: { uri: string | null }) {
+  const { recents, record, clear } = useMobileWalletWallets();
+  const [tab, setTab] = useState<"populares" | "recientes">(
+    recents.length > 0 ? "recientes" : "populares",
+  );
+
+  // If recents becomes empty while we're on the Recientes tab, switch back
+  // to Populares (scheduled to satisfy the set-state-in-effect lint rule).
+  useEffect(() => {
+    if (tab === "recientes" && recents.length === 0) {
+      const t = window.setTimeout(() => setTab("populares"), 0);
+      return () => window.clearTimeout(t);
+    }
+  }, [recents.length, tab]);
+
+  const recentWallets = useMemo(
+    () =>
+      recents
+        .map((id) => MOBILE_WALLETS.find((w) => w.id === id))
+        .filter((w): w is MobileWallet => w != null),
+    [recents],
+  );
+
+  // On first mount, if recents has entries, switch to the Recientes tab
+  // — we use a ref guard so this only runs once on mount, and schedule the
+  // setState via setTimeout to satisfy the react-hooks/set-state-in-effect rule.
+  const didMountRef = useRef(false);
+  useEffect(() => {
+    if (didMountRef.current) return;
+    didMountRef.current = true;
+    if (recents.length > 0) {
+      const t = window.setTimeout(() => setTab("recientes"), 0);
+      return () => window.clearTimeout(t);
+    }
+  }, [recents.length]);
+
+  function handleWalletClick(id: string) {
+    record(id);
+  }
+
+  return (
+    <Tabs value={tab} onValueChange={(v) => setTab(v as "populares" | "recientes")}>
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+          No tienes wallet? Descarga una
+        </span>
+        {recents.length > 0 && tab === "recientes" && (
+          <button
+            onClick={clear}
+            className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] text-muted-foreground transition-colors hover:bg-white/5 hover:text-red-300"
+            title="Borrar recientes"
+          >
+            <Trash2 className="h-2.5 w-2.5" />
+            Limpiar
+          </button>
+        )}
+      </div>
+
+      <TabsList className="grid w-full grid-cols-2 rounded-lg bg-white/[0.04] p-0.5 ring-1 ring-white/8">
+        <TabsTrigger
+          value="populares"
+          className="flex items-center gap-1.5 rounded-md py-1.5 text-[11px] font-medium data-[state=active]:bg-white/10 data-[state=active]:text-white text-muted-foreground data-[state=active]:shadow-none"
+        >
+          <Star className="h-2.5 w-2.5" />
+          Populares
+          <span className="ml-1 rounded-full bg-white/5 px-1.5 py-0.5 text-[9px] text-muted-foreground">
+            {MOBILE_WALLETS.length}
+          </span>
+        </TabsTrigger>
+        <TabsTrigger
+          value="recientes"
+          className="flex items-center gap-1.5 rounded-md py-1.5 text-[11px] font-medium data-[state=active]:bg-white/10 data-[state=active]:text-white text-muted-foreground data-[state=active]:shadow-none"
+        >
+          <Clock className="h-2.5 w-2.5" />
+          Recientes
+          {recents.length > 0 && (
+            <span className="ml-1 rounded-full bg-[#8b7cf6]/15 px-1.5 py-0.5 text-[9px] text-[#b8a8ff] ring-1 ring-[#8b7cf6]/30">
+              {recents.length}
+            </span>
+          )}
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="populares" className="mt-2">
+        <div className="grid grid-cols-2 gap-2">
+          {MOBILE_WALLETS.map((w) => (
+            <MobileWalletTile
+              key={w.id}
+              wallet={w}
+              uri={uri}
+              onClick={() => handleWalletClick(w.id)}
+              isRecent={recents.includes(w.id)}
+            />
+          ))}
+        </div>
+      </TabsContent>
+
+      <TabsContent value="recientes" className="mt-2">
+        {recentWallets.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/8 bg-white/[0.02] px-4 py-6 text-center">
+            <Clock className="h-5 w-5 text-muted-foreground/40" />
+            <div className="text-xs text-muted-foreground">
+              Aún no abriste ninguna wallet.
+            </div>
+            <div className="text-[10px] text-muted-foreground/70">
+              Las wallets que abras se listarán aquí.
+            </div>
+            <button
+              onClick={() => setTab("populares")}
+              className="mt-1 rounded-md bg-white/5 px-2.5 py-1 text-[11px] text-white/80 ring-1 ring-white/8 transition-colors hover:bg-white/10"
+            >
+              Ver populares
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            {recentWallets.map((w) => (
+              <MobileWalletTile
+                key={w.id}
+                wallet={w}
+                uri={uri}
+                onClick={() => handleWalletClick(w.id)}
+                isRecent={true}
+              />
+            ))}
+          </div>
+        )}
+      </TabsContent>
+    </Tabs>
+  );
+}
+
+function MobileWalletTile({
+  wallet,
+  uri,
+  onClick,
+  isRecent = false,
+}: {
+  wallet: MobileWallet;
+  uri: string | null;
+  onClick: () => void;
+  isRecent?: boolean;
+}) {
+  // In production with a real WC projectId, we'd deep-link to the wallet app
+  // using `${wallet.wcDeepLink}${encodeURIComponent(uri)}`. Since this is a
+  // demo, we just link to the wallet's download page.
+  const href = wallet.url;
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={onClick}
+      className="group flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.02] px-2.5 py-2 text-[11px] text-white/80 transition-all hover:border-[#8b7cf6]/40 hover:bg-white/[0.05]"
+      title={`Abrir ${wallet.name}`}
+    >
+      <div
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white"
+        style={{
+          background: `linear-gradient(135deg, ${wallet.gradient[0]}, ${wallet.gradient[1]})`,
+        }}
+      >
+        {wallet.glyph}
+      </div>
+      <span className="min-w-0 flex-1 truncate">{wallet.name}</span>
+      {isRecent && (
+        <span
+          className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#8b7cf6]"
+          title="Abierta recientemente"
+        />
+      )}
+      <ExternalLink className="h-2.5 w-2.5 shrink-0 text-muted-foreground/70 transition-colors group-hover:text-white" />
+    </a>
+  );
+}
+
+/**
+ * Local wrapper to allow overriding the recents hook in tests — currently just
+ * re-exports useMobileWalletRecents() so we get a single source of truth.
+ */
+function useMobileWalletWallets() {
+  return useMobileWalletRecents();
 }
