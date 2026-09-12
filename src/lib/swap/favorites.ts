@@ -12,10 +12,11 @@ export interface FavoritePair {
   addedAt: number;
 }
 
-const STORAGE_KEY = "portal:swap-favorites";
+const STORAGE_KEY = "portal:swap-favorites-v2";
 
 const DEFAULT_FAVORITES: FavoritePair[] = [
-  { id: "fav-eth-usdc", fromSymbol: "ETH", toSymbol: "USDC", chain: "eth", addedAt: Date.now() - 7 * 86_400_000 },
+  { id: "fav-eth-qfs", fromSymbol: "ETH", toSymbol: "QFS", chain: "eth", addedAt: Date.now() - 7 * 86_400_000 },
+  { id: "fav-eth-usdc", fromSymbol: "ETH", toSymbol: "USDC", chain: "eth", addedAt: Date.now() - 6 * 86_400_000 },
   { id: "fav-bnb-usdt", fromSymbol: "BNB", toSymbol: "USDT", chain: "bnb", addedAt: Date.now() - 5 * 86_400_000 },
   { id: "fav-pol-usdc", fromSymbol: "POL", toSymbol: "USDC", chain: "polygon", addedAt: Date.now() - 3 * 86_400_000 },
   { id: "fav-sol-usdc", fromSymbol: "SOL", toSymbol: "USDC", chain: "solana", addedAt: Date.now() - 1 * 86_400_000 },

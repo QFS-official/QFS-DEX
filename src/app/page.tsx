@@ -27,7 +27,7 @@ export default function Home() {
   // ─── Swap mode trade state (lifted so chart + favorites + history can read it) ───
   const [chain, setChain] = useState<ChainId>("eth");
   const [deSymbol, setDeSymbol] = useState<string>("ETH");
-  const [aSymbol, setASymbol] = useState<string>("USDC");
+  const [aSymbol, setASymbol] = useState<string>("QFS");
   const [deAmount, setDeAmount] = useState<string>("");
 
   // Calculate the current price ratio for the chart (1 DE = X A)

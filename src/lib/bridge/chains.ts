@@ -114,6 +114,19 @@ export interface BridgeToken {
 
 export const BRIDGE_TOKENS: BridgeToken[] = [
   {
+    symbol: "QFS",
+    name: "QFS Token",
+    addressByChain: {
+      eth: "0xb5787DA56A4eaF11864696d8B5C6671aDF3449E7",
+    },
+    usdPrice: 1.0,
+    change24h: 4.20,
+    verified: true,
+    emoji: "Q",
+    gradient: ["#0F3B63", "#1E5BC6"],
+    decimals: 18,
+  },
+  {
     symbol: "USDC",
     name: "USD Coin",
     addressByChain: {
