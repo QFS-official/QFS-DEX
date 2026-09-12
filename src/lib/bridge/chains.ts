@@ -117,7 +117,8 @@ export const BRIDGE_TOKENS: BridgeToken[] = [
     symbol: "QFS",
     name: "QFS Token",
     addressByChain: {
-      eth: "0xb5787DA56A4eaF11864696d8B5C6671aDF3449E7",
+      eth: "0x7C670A7EBa354E0d22F0ecBBE7A36BF10dCE305E",
+      polygon: "0xb5787DA56A4eaF11864696d8B5C6671aDF3449E7",
     },
     usdPrice: 1.0,
     change24h: 4.20,
