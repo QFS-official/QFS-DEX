@@ -13,6 +13,7 @@ import {
   PieChart,
   Settings2,
   ShieldCheck,
+  Star,
   TrendingUp,
 } from "lucide-react";
 import {
@@ -26,24 +27,30 @@ import { useWallet } from "@/hooks/use-wallet";
 import { NetworkSelector } from "./network-selector";
 import { TokenSelector } from "./token-selector";
 import { useToast } from "@/hooks/use-toast";
+import { useFavorites } from "@/lib/swap/favorites";
+import { addSwapRecord } from "@/lib/swap/history";
 
 interface SwapPanelState {
   token: BridgeToken | null;
   amount: string;
 }
 
-const INIT_DE: SwapPanelState = {
-  token: NATIVE_BY_CHAIN.eth,
-  amount: "",
-};
-
-const INIT_A: SwapPanelState = {
-  token: null, // will be set to USDC on mount
-  amount: "",
-};
-
 const SLIPPAGE_OPTIONS = ["0.5%", "1%", "2%", "3%"];
 const DEFAULT_SLIPPAGE = "1%";
+
+export interface SwapCardProps {
+  wallet: ReturnType<typeof useWallet>;
+  /** Controlled trade state — owned by the page so it can be shared with
+   *  PriceChart, FavoritePairs and SwapHistory. */
+  chain: ChainId;
+  deSymbol: string;
+  aSymbol: string;
+  deAmount: string;
+  onChainChange: (next: ChainId) => void;
+  onDeSymbolChange: (next: string) => void;
+  onASymbolChange: (next: string) => void;
+  onAmountChange: (next: string) => void;
+}
 
 /**
  * OKX-style same-chain swap card.
@@ -51,27 +58,34 @@ const DEFAULT_SLIPPAGE = "1%";
  * Visual differences from the Portal-style BridgeCard:
  *  - "De" / "A" labels (Spanish) instead of "From" / "To"
  *  - Single network selector at the top (applies to both sides — same-chain swap)
- *  - Large token logos (~56px) instead of compact 28px pills
- *  - Center ratio circle showing live price ratio (1 ETH ≈ 2350 USDC)
+ *  - Large token logos (~44px) instead of compact 28px pills
+ *  - Center swap-direction button
  *  - Utility icons in sub-header: paste contract address, settings, list/chart toggle
+ *  - Star toggle in sub-header — adds/removes current pair from favorites
  *  - Stark white CTA button with black text
  */
-export function SwapCard({ wallet }: { wallet: ReturnType<typeof useWallet> }) {
-  const [chain, setChain] = useState<ChainId>("eth");
-  const [deSymbol, setDeSymbol] = useState<string>("ETH");
-  const [aSymbol, setASymbol] = useState<string>("USDC");
-  const [deAmount, setDeAmount] = useState<string>("");
+export function SwapCard({
+  wallet,
+  chain,
+  deSymbol,
+  aSymbol,
+  deAmount,
+  onChainChange,
+  onDeSymbolChange,
+  onASymbolChange,
+  onAmountChange,
+}: SwapCardProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [slippage, setSlippage] = useState(DEFAULT_SLIPPAGE);
   const [modalOpen, setModalOpen] = useState(false);
   const [swapping, setSwapping] = useState(false);
   const [swappedTx, setSwappedTx] = useState<string | null>(null);
   const { toast } = useToast();
+  const { isFavorite, toggle: toggleFavorite } = useFavorites();
 
   const tokens = useMemo(() => tokensForChain(chain), [chain]);
 
   // Derive token objects directly from the chain's available tokens
-  // (no setState-in-effect — avoids cascading renders)
   const deToken = useMemo<BridgeToken | null>(() => {
     return (
       tokens.find((t) => t.symbol === deSymbol) ??
@@ -124,6 +138,8 @@ export function SwapCard({ wallet }: { wallet: ReturnType<typeof useWallet> }) {
   const walletChainMatches =
     connected && CHAINS[chain].evmChainId === wallet.chainId;
 
+  const pairFavorited = isFavorite(deSymbol, aSymbol, chain);
+
   const cta = (() => {
     if (invalidPair) return { label: "Selecciona un token diferente", disabled: true };
     if (!chainEvm) {
@@ -146,13 +162,12 @@ export function SwapCard({ wallet }: { wallet: ReturnType<typeof useWallet> }) {
       : deToken.symbol === "POL" ? "540"
       : deToken.symbol === "SOL" ? "3.2"
       : "100";
-    setDeAmount(bal);
+    onAmountChange(bal);
   }
 
   function swapSides() {
-    const tmpSymbol = deSymbol;
-    setDeSymbol(aSymbol);
-    setASymbol(tmpSymbol);
+    onDeSymbolChange(aSymbol);
+    onASymbolChange(deSymbol);
   }
 
   async function handleSwap() {
@@ -197,13 +212,24 @@ export function SwapCard({ wallet }: { wallet: ReturnType<typeof useWallet> }) {
     setSwappedTx(fakeTx);
     setSwapping(false);
 
+    // Persist to swap history (will be picked up by SwapHistory panel via event)
+    addSwapRecord({
+      fromSymbol: deToken?.symbol ?? "?",
+      toSymbol: aToken?.symbol ?? "?",
+      fromAmount: amount,
+      toAmount: outputAmount,
+      usdValue,
+      chain,
+      txHash: fakeTx,
+    });
+
     toast({
       title: "Swap enviado",
       description: `Cambiando ${amount} ${deToken?.symbol} por ${outputAmount.toFixed(4)} ${aToken?.symbol} en ${CHAINS[chain].name}.`,
     });
 
     setTimeout(() => {
-      setDeAmount("");
+      onAmountChange("");
       setSwappedTx(null);
     }, 6000);
   }
@@ -234,6 +260,15 @@ export function SwapCard({ wallet }: { wallet: ReturnType<typeof useWallet> }) {
             <h2 className="text-lg font-semibold tracking-tight text-white">Swap</h2>
           </div>
           <div className="flex items-center gap-1">
+            <UtilityButton
+              title={pairFavorited ? "Quitar de favoritos" : "Añadir a favoritos"}
+              onClick={() => toggleFavorite(deSymbol, aSymbol, chain)}
+              active={pairFavorited}
+            >
+              <Star
+                className={"h-4 w-4 " + (pairFavorited ? "fill-[#8b7cf6] text-[#8b7cf6]" : "")}
+              />
+            </UtilityButton>
             <UtilityButton title="Pegar dirección del contrato" onClick={() => toast({ title: "Pegar CA", description: "Pega la dirección del contrato del token." })}>
               <ClipboardPaste className="h-4 w-4" />
             </UtilityButton>
@@ -254,7 +289,7 @@ export function SwapCard({ wallet }: { wallet: ReturnType<typeof useWallet> }) {
             </span>
             <NetworkSelector
               value={chain}
-              onChange={setChain}
+              onChange={onChainChange}
               label="Selecciona una red"
             />
           </div>
@@ -327,7 +362,7 @@ export function SwapCard({ wallet }: { wallet: ReturnType<typeof useWallet> }) {
               <TokenSelectorLarge
                 value={deToken}
                 options={tokens}
-                onChange={(t) => setDeSymbol(t.symbol)}
+                onChange={(t) => onDeSymbolChange(t.symbol)}
               />
               <input
                 inputMode="decimal"
@@ -336,7 +371,7 @@ export function SwapCard({ wallet }: { wallet: ReturnType<typeof useWallet> }) {
                 value={deAmount}
                 onChange={(e) => {
                   const v = e.target.value.replace(/[^0-9.]/g, "");
-                  setDeAmount(v);
+                  onAmountChange(v);
                 }}
                 className="min-w-0 flex-1 bg-transparent text-3xl font-semibold text-white placeholder:text-white/25 focus:outline-none"
               />
@@ -387,7 +422,7 @@ export function SwapCard({ wallet }: { wallet: ReturnType<typeof useWallet> }) {
               <TokenSelectorLarge
                 value={aToken}
                 options={tokens}
-                onChange={(t) => setASymbol(t.symbol)}
+                onChange={(t) => onASymbolChange(t.symbol)}
               />
               <input
                 type="text"

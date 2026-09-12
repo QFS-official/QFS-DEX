@@ -7,12 +7,48 @@ import { BridgeCard } from "@/components/portal/bridge-card";
 import { SwapCard } from "@/components/portal/swap-card";
 import { MarketingPanel } from "@/components/portal/marketing-panel";
 import { ModeTabs, type BridgeMode } from "@/components/portal/mode-tabs";
+import { PriceChart } from "@/components/portal/price-chart";
+import { SwapHistory } from "@/components/portal/swap-history";
+import { FavoritePairs } from "@/components/portal/favorite-pairs";
 import { useWallet } from "@/hooks/use-wallet";
-import { CHAINS, type ChainId } from "@/lib/bridge/chains";
+import {
+  CHAINS,
+  NATIVE_BY_CHAIN,
+  tokensForChain,
+  type ChainId,
+} from "@/lib/bridge/chains";
+import type { FavoritePair } from "@/lib/swap/favorites";
 
 export default function Home() {
   const wallet = useWallet();
   const [mode, setMode] = useState<BridgeMode>("swap");
+
+  // ─── Swap mode trade state (lifted so chart + favorites + history can read it) ───
+  const [chain, setChain] = useState<ChainId>("eth");
+  const [deSymbol, setDeSymbol] = useState<string>("ETH");
+  const [aSymbol, setASymbol] = useState<string>("USDC");
+  const [deAmount, setDeAmount] = useState<string>("");
+
+  // Calculate the current price ratio for the chart (1 DE = X A)
+  const tokens = useMemo(() => tokensForChain(chain), [chain]);
+  const deToken = useMemo(
+    () =>
+      tokens.find((t) => t.symbol === deSymbol) ??
+      NATIVE_BY_CHAIN[chain] ??
+      null,
+    [tokens, deSymbol, chain],
+  );
+  const aToken = useMemo(
+    () =>
+      tokens.find((t) => t.symbol === aSymbol) ??
+      tokens.find((t) => t.symbol === "USDC") ??
+      tokens[1] ??
+      null,
+    [tokens, aSymbol],
+  );
+  const dePrice = deToken?.usdPrice ?? 0;
+  const aPrice = aToken?.usdPrice ?? 0;
+  const ratio = dePrice > 0 && aPrice > 0 ? dePrice / aPrice : 0;
 
   const selectedChain = useMemo(() => {
     return CHAINS[wallet.chainId ? chainIdFromEvm(wallet.chainId) ?? "bnb" : "bnb"];
@@ -22,6 +58,13 @@ export default function Home() {
   const openWallet = useCallback(() => {
     document.dispatchEvent(new CustomEvent("portal:open-wallet"));
   }, []);
+
+  function applyFavorite(fav: FavoritePair) {
+    setChain(fav.chain);
+    setDeSymbol(fav.fromSymbol);
+    setASymbol(fav.toSymbol);
+    setDeAmount("");
+  }
 
   return (
     <div className="portal-bg portal-grid-bg relative flex min-h-screen flex-col">
@@ -33,9 +76,9 @@ export default function Home() {
       </div>
 
       <main className="flex flex-1 items-start justify-center px-4 pt-6 sm:items-center sm:pt-8">
-        <div className="mx-auto flex w-full max-w-5xl flex-col items-stretch gap-6 lg:flex-row lg:items-start">
-          {/* Left: card */}
-          <div className="flex flex-1 flex-col items-center gap-4 lg:flex-none lg:w-[460px]">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-stretch gap-6 lg:flex-row lg:items-start">
+          {/* ─── Left column: favorites + swap card ─── */}
+          <div className="flex flex-1 flex-col gap-3 lg:flex-none lg:w-[460px]">
             <div className="text-center">
               <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
                 {mode === "swap" && "Swap entre tokens"}
@@ -52,7 +95,34 @@ export default function Home() {
               </p>
             </div>
 
-            {mode === "swap" && <SwapCard wallet={wallet} />}
+            {/* Favorite pairs chips (only in swap mode) */}
+            {mode === "swap" && (
+              <div className="rounded-2xl border border-white/6 bg-white/[0.02] p-3">
+                <div className="mb-2 flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">
+                  <Star className="h-3 w-3" /> Pares favoritos
+                </div>
+                <FavoritePairs
+                  currentFrom={deSymbol}
+                  currentTo={aSymbol}
+                  currentChain={chain}
+                  onApply={applyFavorite}
+                />
+              </div>
+            )}
+
+            {mode === "swap" && (
+              <SwapCard
+                wallet={wallet}
+                chain={chain}
+                deSymbol={deSymbol}
+                aSymbol={aSymbol}
+                deAmount={deAmount}
+                onChainChange={setChain}
+                onDeSymbolChange={setDeSymbol}
+                onASymbolChange={setASymbol}
+                onAmountChange={setDeAmount}
+              />
+            )}
             {mode === "bridge" && <BridgeCard wallet={wallet} />}
             {mode === "dca" && <ComingSoonCard label="DCA — próximamente" />}
 
@@ -72,8 +142,18 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right: marketing panel (OKX-style), only on lg+ */}
-          {mode === "swap" && <MarketingPanel />}
+          {/* ─── Right column: chart + history (swap mode) / marketing (other modes) ─── */}
+          {mode === "swap" && (
+            <div className="flex flex-1 flex-col gap-4">
+              <PriceChart
+                fromSymbol={deSymbol}
+                toSymbol={aSymbol}
+                currentPrice={ratio}
+                chainKey={chain}
+              />
+              <SwapHistory />
+            </div>
+          )}
           {mode === "bridge" && <BridgeMarketingPanel />}
           {mode === "dca" && <div className="hidden lg:block lg:w-[440px]" />}
         </div>
@@ -81,6 +161,20 @@ export default function Home() {
 
       <PortalFooter />
     </div>
+  );
+}
+
+function Star({ className }: { className?: string }) {
+  // tiny inline icon for the section header label — keeps the page header lightweight
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z" />
+    </svg>
   );
 }
 
