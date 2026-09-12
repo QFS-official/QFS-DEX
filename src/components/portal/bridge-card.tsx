@@ -119,7 +119,12 @@ export function BridgeCard({ wallet }: { wallet: ReturnType<typeof useWallet> })
   function setMax() {
     if (!from.token) return;
     // Demo balance — in a real app we'd fetch on-chain balance via the wallet
-    const demoBalance = from.token.symbol === "BNB" ? "1.25" : from.token.symbol === "POL" ? "540" : from.token.symbol === "SOL" ? "3.2" : "100";
+    const demoBalance =
+      from.token.symbol === "BNB" ? "1.25"
+      : from.token.symbol === "POL" ? "540"
+      : from.token.symbol === "ETH" ? "0.42"
+      : from.token.symbol === "SOL" ? "3.2"
+      : "100";
     setFrom({ ...from, amount: demoBalance });
   }
 
@@ -321,7 +326,17 @@ export function BridgeCard({ wallet }: { wallet: ReturnType<typeof useWallet> })
             <div className="mt-1 text-xs text-muted-foreground">
               ≈ ${usdValue.toFixed(2)} ·{" "}
               <span className="text-white/60">
-                Bal: {from.token?.symbol === "BNB" ? "1.25" : from.token?.symbol === "POL" ? "540" : from.token?.symbol === "SOL" ? "3.2" : "100"} {from.token?.symbol}
+                Bal:{" "}
+                {from.token?.symbol === "BNB"
+                  ? "1.25"
+                  : from.token?.symbol === "POL"
+                    ? "540"
+                    : from.token?.symbol === "ETH"
+                      ? "0.42"
+                      : from.token?.symbol === "SOL"
+                        ? "3.2"
+                        : "100"}{" "}
+                {from.token?.symbol}
               </span>
             </div>
           </div>

@@ -1,9 +1,9 @@
 /**
  * Chain configurations for the Portal-style bridge.
- * Covers BNB Chain (BSC), Polygon, and Solana.
+ * Covers BNB Chain (BSC), Polygon, Solana, and Ethereum mainnet.
  */
 
-export type ChainId = "bnb" | "polygon" | "solana";
+export type ChainId = "bnb" | "polygon" | "solana" | "eth";
 
 export interface ChainConfig {
   id: ChainId;
@@ -58,6 +58,20 @@ export const CHAINS: Record<ChainId, ChainConfig> = {
     isEvm: true,
     glyph: "P",
   },
+  eth: {
+    id: "eth",
+    name: "Ethereum",
+    shortName: "ETH",
+    evmChainIdHex: "0x1",
+    evmChainId: 1,
+    explorer: "https://etherscan.io",
+    nativeSymbol: "ETH",
+    nativeName: "Ether",
+    gradient: ["#627EEA", "#8A92B2"],
+    bridgeTime: "~5 min",
+    isEvm: true,
+    glyph: "Ξ",
+  },
   solana: {
     id: "solana",
     name: "Solana",
@@ -101,6 +115,7 @@ export const BRIDGE_TOKENS: BridgeToken[] = [
     addressByChain: {
       bnb: "0x8AC76a86ccAC72f7D76555AaC5Df0617DdCa8E",
       polygon: "0x3c499c542cEF5E3811e1192ce70d8cc03d5703fa",
+      eth: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
       solana: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     },
     usdPrice: 1.0,
@@ -114,6 +129,7 @@ export const BRIDGE_TOKENS: BridgeToken[] = [
     addressByChain: {
       bnb: "0x55d398326f99059fF7e31Ad08CFC1F7Cc8129135",
       polygon: "0xc2132D05D31c914a87C6611C10748AEc348Bf728",
+      eth: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
       solana: "Es9vMFrzaCERmJfrF4H2FY5NMAfjH3E2SkoH2EF5pdrT",
     },
     usdPrice: 1.0,
@@ -122,11 +138,12 @@ export const BRIDGE_TOKENS: BridgeToken[] = [
     decimals: 6,
   },
   {
-    symbol: "ETH",
-    name: "Wrapped ETH",
+    symbol: "WETH",
+    name: "Wrapped Ether",
     addressByChain: {
       bnb: "0x2170Ed0880ac9C75B4F8a8B0C1B5E8E5c5D5Aa5",
-      polygon: "0x7ceB23fD6bC0adD5926D3E3Bf5b9c8b0a5b5b5b5",
+      polygon: "0x7ceB23fD6bC0adD59262eD9025EeB5b5b5b5b5b5",
+      eth: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     },
     usdPrice: 2350.0,
     emoji: "💎",
@@ -139,6 +156,7 @@ export const BRIDGE_TOKENS: BridgeToken[] = [
     addressByChain: {
       bnb: "0x4fE9355e25b6D5D6f2c9E17580Bc0eA1B0F5Aa5",
       polygon: "0xD76C0eA1B0F5Aa5e25b6D5D6f2c9E17580Bc0eA1",
+      eth: "0x6985881eC6C4098270259b7BCd2B0B1a5B5B5B5B",
       solana: "worm3DTm7BkJv5k7vU3yB8D5c8b9k2V9M1cJ4D5f",
     },
     usdPrice: 0.42,
@@ -165,6 +183,15 @@ export const NATIVE_BY_CHAIN: Record<ChainId, BridgeToken> = {
     usdPrice: 0.42,
     emoji: "🟣",
     gradient: ["#8247E5", "#A36AE5"],
+    decimals: 18,
+  },
+  eth: {
+    symbol: "ETH",
+    name: "Ether",
+    addressByChain: { eth: "native" },
+    usdPrice: 2350.0,
+    emoji: "Ξ",
+    gradient: ["#627EEA", "#8A92B2"],
     decimals: 18,
   },
   solana: {

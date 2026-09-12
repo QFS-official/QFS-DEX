@@ -26,6 +26,17 @@ declare global {
   }
 }
 
+/**
+ * Public RPC endpoints used when we need to add a chain to the user's wallet
+ * (the wallet hasn't seen this chain before, error code 4902).
+ */
+const RPC_URLS: Record<ChainId, string> = {
+  bnb: "https://bsc-dataseed.binance.org",
+  polygon: "https://polygon-rpc.com",
+  eth: "https://eth.llamarpc.com",
+  solana: "", // not EVM — never used
+};
+
 export type WalletKind = "metamask" | "coinbase";
 
 export interface WalletState {
@@ -204,7 +215,7 @@ export function useWallet() {
                   symbol: chain.nativeSymbol,
                   decimals: 18,
                 },
-                rpcUrls: ["https://bsc-dataseed.binance.org"],
+                rpcUrls: [RPC_URLS[chain.id] ?? "https://rpc.ankr.com/eth"],
                 blockExplorerUrls: [chain.explorer],
               },
             ],
