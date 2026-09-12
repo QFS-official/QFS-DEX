@@ -128,6 +128,47 @@ export const BRIDGE_TOKENS: BridgeToken[] = [
     decimals: 18,
   },
   {
+    symbol: "ALARAB",
+    name: "AlArab",
+    addressByChain: {
+      eth: "0x93617904A0A15063B54bd14cC595AA10f2A8e358",
+      polygon: "0xF5c068f28eBF91b22e52C2ecD230621879e914B8",
+    },
+    usdPrice: 1.0,
+    change24h: 1.85,
+    verified: true,
+    emoji: "A",
+    gradient: ["#C19A6B", "#8B6914"],
+    decimals: 18,
+  },
+  {
+    symbol: "GCRM",
+    name: "GCRM",
+    addressByChain: {
+      eth: "0x2Ae2d0DFdB1B3b03A771167c43b983A97b65B9B3",
+      polygon: "0x11175910c6F02913782777840ac008F30720046f",
+    },
+    usdPrice: 0.5,
+    change24h: -0.92,
+    verified: true,
+    emoji: "G",
+    gradient: ["#00BFA5", "#00796B"],
+    decimals: 18,
+  },
+  {
+    symbol: "TRAEX",
+    name: "TRAEX",
+    addressByChain: {
+      polygon: "0xf343cD6836FD14bE86aAE0a2a76c8b0e73E89dD0",
+    },
+    usdPrice: 0.25,
+    change24h: 2.34,
+    verified: true,
+    emoji: "T",
+    gradient: ["#FF6B35", "#F7931E"],
+    decimals: 18,
+  },
+  {
     symbol: "USDC",
     name: "USD Coin",
     addressByChain: {
