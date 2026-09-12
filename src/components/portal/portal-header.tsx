@@ -42,7 +42,9 @@ export function PortalHeader({ wallet, onOpenWallet }: HeaderProps) {
         <div className="flex items-center gap-2 sm:gap-3">
           <nav className="hidden items-center gap-1 sm:flex">
             <NavLink active>{t("header.nav.swap")}</NavLink>
-            <NavLink>{t("header.nav.usdc")}</NavLink>
+            <NavLink href="https://qfspay.org" external>
+              {t("header.nav.explorer")}
+            </NavLink>
             <NavLink href="https://qfspay.org" external>
               {t("header.nav.community")}
             </NavLink>
