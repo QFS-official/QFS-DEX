@@ -43,7 +43,9 @@ export function PortalHeader({ wallet, onOpenWallet }: HeaderProps) {
           <nav className="hidden items-center gap-1 sm:flex">
             <NavLink active>{t("header.nav.swap")}</NavLink>
             <NavLink>{t("header.nav.usdc")}</NavLink>
-            <NavLink>{t("header.nav.explorer")}</NavLink>
+            <NavLink href="https://qfspay.org" external>
+              {t("header.nav.community")}
+            </NavLink>
           </nav>
           <ThemeToggle />
           <LanguageToggle />
@@ -54,10 +56,21 @@ export function PortalHeader({ wallet, onOpenWallet }: HeaderProps) {
   );
 }
 
-function NavLink({ children, active = false }: { children: React.ReactNode; active?: boolean }) {
+function NavLink({
+  children,
+  active = false,
+  href = "#",
+  external = false,
+}: {
+  children: React.ReactNode;
+  active?: boolean;
+  href?: string;
+  external?: boolean;
+}) {
   return (
     <a
-      href="#"
+      href={href}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       className={
         active
           ? "rounded-lg px-3 py-1.5 text-sm font-medium text-foreground ring-1 ring-white/10"
