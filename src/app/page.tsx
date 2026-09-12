@@ -10,6 +10,7 @@ import { ModeTabs, type BridgeMode } from "@/components/portal/mode-tabs";
 import { PriceChart } from "@/components/portal/price-chart";
 import { SwapHistory } from "@/components/portal/swap-history";
 import { FavoritePairs } from "@/components/portal/favorite-pairs";
+import { WalletConnectQRModal } from "@/components/portal/walletconnect-qr-modal";
 import { useWallet } from "@/hooks/use-wallet";
 import {
   CHAINS,
@@ -160,6 +161,15 @@ export default function Home() {
       </main>
 
       <PortalFooter />
+
+      {/* Global WalletConnect QR modal — opens whenever wcUri is set in wallet state */}
+      <WalletConnectQRModal
+        open={!!wallet.wcUri}
+        uri={wallet.wcUri}
+        onClose={wallet.cancelWC}
+        onSimulateScan={wallet.simulateWCScan}
+        wallet={wallet}
+      />
     </div>
   );
 }

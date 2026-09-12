@@ -34,7 +34,9 @@ export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
     setConnecting(null);
   }
 
-  const anyInstalled = WALLETS.some((w) => wallet.installed[w.id]);
+  const anyExtensionInstalled = WALLETS.some(
+    (w) => !w.isProtocol && wallet.installed[w.id],
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -61,51 +63,72 @@ export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
         </div>
 
         <div className="flex flex-col gap-2 p-5">
-          {WALLETS.map((w) => {
+          {WALLETS.map((w, i) => {
+            // Insert a divider before the protocol wallets (WalletConnect)
+            const showDivider =
+              i > 0 && w.isProtocol && !WALLETS[i - 1].isProtocol;
             const installed = wallet.installed[w.id];
             const isConnectingThis = connecting === w.id;
             const disabled = isConnectingThis || wallet.isConnecting;
 
             return (
-              <button
-                key={w.id}
-                onClick={() => handleConnect(w.id)}
-                disabled={disabled}
-                className="group relative flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] p-3.5 text-left transition-all hover:border-[#8b7cf6]/40 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {/* Wallet glyph */}
-                <div
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
-                  style={{
-                    background: `linear-gradient(135deg, ${w.gradient[0]}, ${w.gradient[1]})`,
-                    boxShadow: `0 4px 12px ${w.gradient[0]}40`,
-                  }}
+              <div key={w.id}>
+                {showDivider && (
+                  <div className="my-2 flex items-center gap-3">
+                    <div className="portal-divider flex-1" />
+                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                      O conecta vía QR
+                    </span>
+                    <div className="portal-divider flex-1" />
+                  </div>
+                )}
+                <button
+                  onClick={() => handleConnect(w.id)}
+                  disabled={disabled}
+                  className="group relative flex w-full items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] p-3.5 text-left transition-all hover:border-[#8b7cf6]/40 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {w.glyph}
-                </div>
+                  {/* Wallet glyph */}
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+                    style={{
+                      background: `linear-gradient(135deg, ${w.gradient[0]}, ${w.gradient[1]})`,
+                      boxShadow: `0 4px 12px ${w.gradient[0]}40`,
+                    }}
+                  >
+                    {w.glyph}
+                  </div>
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-white">{w.name}</span>
-                    {installed && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[#14F195]/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-[#14F195] ring-1 ring-[#14F195]/30">
-                        Detectada
-                      </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-white">{w.name}</span>
+                      {w.isProtocol ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#3B99EF]/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-[#3B99EF] ring-1 ring-[#3B99EF]/30">
+                          QR
+                        </span>
+                      ) : installed ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#14F195]/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-[#14F195] ring-1 ring-[#14F195]/30">
+                          Detectada
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="truncate text-xs text-muted-foreground">
+                      {w.isProtocol
+                        ? w.description
+                        : installed
+                          ? w.description
+                          : "No instalada — abre el instalador"}
+                    </div>
+                  </div>
+
+                  <div className="flex shrink-0 items-center">
+                    {isConnectingThis ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-[#8b7cf6]" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 -rotate-90 text-muted-foreground transition-transform group-hover:text-white" />
                     )}
                   </div>
-                  <div className="truncate text-xs text-muted-foreground">
-                    {installed ? w.description : "No instalada — abre el instalador"}
-                  </div>
-                </div>
-
-                <div className="flex shrink-0 items-center">
-                  {isConnectingThis ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-[#8b7cf6]" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 -rotate-90 text-muted-foreground transition-transform group-hover:text-white" />
-                  )}
-                </div>
-              </button>
+                </button>
+              </div>
             );
           })}
 
@@ -123,10 +146,11 @@ export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
             </p>
           </div>
 
-          {!anyInstalled && (
+          {/* "Don't see your wallet" — only show install links for extension wallets */}
+          {!anyExtensionInstalled && (
             <p className="mt-1 text-center text-[11px] text-muted-foreground">
               ¿No ves tu wallet?{" "}
-              {WALLETS.map((w, i) => (
+              {WALLETS.filter((w) => !w.isProtocol).map((w, i, arr) => (
                 <span key={w.id}>
                   <a
                     href={w.installUrl}
@@ -136,7 +160,7 @@ export function WalletConnectModal({ open, onOpenChange, wallet }: Props) {
                   >
                     Instalar {w.name}
                   </a>
-                  {i < WALLETS.length - 1 ? " · " : ""}
+                  {i < arr.length - 1 ? " · " : ""}
                 </span>
               ))}
               .

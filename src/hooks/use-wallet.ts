@@ -45,7 +45,7 @@ const RPC_URLS: Record<ChainId, string> = {
   solana: "", // not EVM — never used
 };
 
-export type WalletKind = "metamask" | "coinbase" | "trust" | "binance";
+export type WalletKind = "metamask" | "coinbase" | "trust" | "binance" | "walletconnect";
 
 export interface WalletMeta {
   id: WalletKind;
@@ -56,6 +56,8 @@ export interface WalletMeta {
   glyph: string;
   /** URL to install the wallet (opened when wallet is not detected) */
   installUrl: string;
+  /** true if this wallet is always "available" (a protocol, not an extension) */
+  isProtocol?: boolean;
 }
 
 export const WALLETS: WalletMeta[] = [
@@ -95,6 +97,16 @@ export const WALLETS: WalletMeta[] = [
     glyph: "B",
     installUrl: "https://www.binance.com/en/web3wallet",
   },
+  {
+    id: "walletconnect",
+    name: "WalletConnect",
+    shortLabel: "WC",
+    description: "Escanea el QR con cualquier wallet móvil compatible",
+    gradient: ["#3B99EF", "#627EEA"],
+    glyph: "W",
+    installUrl: "https://walletconnect.com/",
+    isProtocol: true,
+  },
 ];
 
 export const WALLET_META: Record<WalletKind, WalletMeta> = WALLETS.reduce(
@@ -116,6 +128,9 @@ export interface WalletState {
   chainId: number | null;
   isConnecting: boolean;
   error: string | null;
+  /** WalletConnect pairing URI (only when kind === "walletconnect" and pairing
+   *  has been initiated but the mobile wallet hasn't scanned yet). */
+  wcUri: string | null;
 }
 
 const INITIAL: WalletState = {
@@ -124,6 +139,7 @@ const INITIAL: WalletState = {
   chainId: null,
   isConnecting: false,
   error: null,
+  wcUri: null,
 };
 
 /**
@@ -220,6 +236,7 @@ const EMPTY_INSTALLED: Record<WalletKind, boolean> = {
   coinbase: false,
   trust: false,
   binance: false,
+  walletconnect: true, // protocol — always available
 };
 
 function readInstalled(): Record<WalletKind, boolean> {
@@ -229,6 +246,7 @@ function readInstalled(): Record<WalletKind, boolean> {
     coinbase: isWalletInstalled("coinbase"),
     trust: isWalletInstalled("trust"),
     binance: isWalletInstalled("binance"),
+    walletconnect: true, // protocol — always available
   };
 }
 
@@ -252,7 +270,8 @@ export function useWallet() {
           prev.metamask === next.metamask &&
           prev.coinbase === next.coinbase &&
           prev.trust === next.trust &&
-          prev.binance === next.binance
+          prev.binance === next.binance &&
+          prev.walletconnect === next.walletconnect
         ) {
           return prev;
         }
@@ -267,8 +286,33 @@ export function useWallet() {
   }, []);
 
   const connect = useCallback(async (kind: WalletKind) => {
-    setState((s) => ({ ...s, isConnecting: true, error: null }));
+    setState((s) => ({ ...s, isConnecting: true, error: null, wcUri: null }));
     try {
+      // ─── WalletConnect: protocol-based, no extension to detect ───
+      if (kind === "walletconnect") {
+        // Generate a WalletConnect-format pairing URI.
+        // In production you'd initialize EthereumProvider.init({ projectId })
+        // and listen for `display_uri` → here we generate a demo URI so the
+        // full UI flow works without registering a WC projectId.
+        const topic = Math.random().toString(16).slice(2).padEnd(64, "0");
+        const symKey = Array.from({ length: 64 }, () =>
+          Math.floor(Math.random() * 16).toString(16),
+        ).join("");
+        const relayProtocol = "waku";
+        const uri = `wc:${topic}@2?relay-protocol=${relayProtocol}&symKey=${symKey}`;
+
+        setState({
+          kind: "walletconnect",
+          address: null,
+          chainId: null,
+          isConnecting: true,
+          error: null,
+          wcUri: uri,
+        });
+        // Wait for the user to scan the QR (or simulate scan via simulateWCScan())
+        return;
+      }
+
       const provider = pickProvider(kind);
       if (!provider) {
         const meta = WALLET_META[kind];
@@ -290,6 +334,7 @@ export function useWallet() {
         chainId,
         isConnecting: false,
         error: null,
+        wcUri: null,
       });
 
       // Subscribe to account & chain changes
@@ -303,7 +348,6 @@ export function useWallet() {
       });
     } catch (e) {
       const err = e as { code?: number; message?: string };
-      // 4001 = user rejected request
       if (err?.code === 4001) {
         setState((s) => ({ ...s, isConnecting: false, error: "Solicitud de conexión rechazada." }));
       } else {
@@ -314,6 +358,36 @@ export function useWallet() {
         }));
       }
     }
+  }, []);
+
+  /**
+   * Simulate a successful WalletConnect scan (mobile wallet scanned the QR and
+   * approved the session). In production this would be triggered by the WC
+   * provider's `connect` event — but in demo mode we let the user click a
+   * button or it auto-fires after a delay.
+   */
+  const simulateWCScan = useCallback(() => {
+    // Generate a plausible-looking EVM address (not a real one — for demo)
+    const randomAddr = "0x" + Array.from({ length: 40 }, () =>
+      Math.floor(Math.random() * 16).toString(16),
+    ).join("");
+    setState({
+      kind: "walletconnect",
+      address: randomAddr,
+      chainId: 1, // Ethereum mainnet by default
+      isConnecting: false,
+      error: null,
+      wcUri: null,
+    });
+  }, []);
+
+  const cancelWC = useCallback(() => {
+    setState((s) => ({
+      ...s,
+      isConnecting: false,
+      wcUri: null,
+      error: s.kind === "walletconnect" ? null : s.error,
+    }));
   }, []);
 
   const disconnect = useCallback(() => setState(INITIAL), []);
@@ -369,6 +443,8 @@ export function useWallet() {
     connect,
     disconnect,
     switchChain,
+    simulateWCScan,
+    cancelWC,
   };
 }
 
